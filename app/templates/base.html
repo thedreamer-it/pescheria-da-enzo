@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pescheria da Enzo</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <h1>Pescheria</h1>
+      <nav>
+        <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('main.nuovo_ordine') }}">Nuovo ordine</a>
+        <a href="{{ url_for('main.ordini') }}">Ordini</a>
+        <a href="{{ url_for('main.listino') }}">Listino</a>
+        <a href="{{ url_for('main.prodotti') }}">Magazzino</a>
+        <a href="{{ url_for('main.clienti') }}">Clienti</a>
+      </nav>
+    </aside>
+    <main class="main-area">
+      <header class="main-header">
+        <div class="logo">Pescheria da Enzo</div>
+      </header>
+      <section class="page">{% block content %}{% endblock %}</section>
+    </main>
+  </div>
+</body>
+</html>

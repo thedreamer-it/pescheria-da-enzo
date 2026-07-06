@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Ordini</h2>
+<table>
+  <thead><tr><th>ID</th><th>Cliente</th><th>Data</th><th>Stato</th><th>Totale</th></tr></thead>
+  <tbody>
+    {% for ordine in ordini %}
+    <tr class="click-row" onclick="location.href='{{ url_for('main.ordine_dettaglio', order_id=ordine.id) }}'">
+      <td>#{{ ordine.id }}</td>
+      <td>{{ ordine.cliente.nome if ordine.cliente else '-' }}</td>
+      <td>{{ ordine.data_ordine.strftime('%d/%m/%Y %H:%M') }}</td>
+      <td>{{ ordine.stato }}</td>
+      <td>€ {{ '%.2f'|format(ordine.totale) }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="5">Nessun ordine presente.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

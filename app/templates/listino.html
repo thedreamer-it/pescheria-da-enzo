@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Listino</h2>
+<table>
+  <thead><tr><th>Prodotto</th><th>Disponibile</th><th>Giacenza</th><th>Prezzo</th></tr></thead>
+  <tbody>
+    {% for prodotto in prodotti %}
+    <tr>
+      <td>{{ prodotto.nome }}</td>
+      <td>{{ 'Sì' if prodotto.disponibile else 'No' }}</td>
+      <td>{{ prodotto.giacenza }}</td>
+      <td>€ {{ '%.2f'|format(prodotto.prezzo_pubblico) }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
