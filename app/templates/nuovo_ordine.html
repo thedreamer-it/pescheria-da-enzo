@@ -34,7 +34,7 @@
           </div>
         </div>
 
-        <button class="btn-add" {{ 'disabled' if not p.disponibile }}>Aggiungi</button>
+        <button type="button" class="btn-add" {{ 'disabled' if not p.disponibile }}>Aggiungi</button>
       </div>
       {% endfor %}
     </div>
@@ -57,7 +57,7 @@
       <textarea id="order-note" rows="3"></textarea>
 
       <div class="total-line">Totale: € <span id="total">0.00</span></div>
-      <button id="place-order" class="btn-primary">Conferma ordine</button>
+      <button id="place-order" class="btn-primary" type="button">Conferma ordine</button>
     </div>
   </section>
 </div>
@@ -80,9 +80,9 @@ function renderCart() {
         ${it.confezione_nome} — ${it.qty} x €${it.prezzo.toFixed(2)}
       </div>
       <div>
-        <button onclick="dec(${i})">-</button>
-        <button onclick="inc(${i})">+</button>
-        <button onclick="rm(${i})">x</button>
+        <button type="button" onclick="dec(${i})">-</button>
+        <button type="button" onclick="inc(${i})">+</button>
+        <button type="button" onclick="rm(${i})">x</button>
       </div>
     `;
     wrap.appendChild(el);
@@ -124,7 +124,7 @@ document.querySelectorAll('.prod-card').forEach(card => {
     qtyValue.textContent = qty;
   });
 
-  addBtn.addEventListener('click', e => {
+  addBtn.addEventListener('click', () => {
     const id = parseInt(card.dataset.id);
     const prezzo = parseFloat(card.dataset.prezzo);
     const nome = card.querySelector('.prod-title').innerText;
