@@ -238,28 +238,6 @@ button, input, select, textarea {
   letter-spacing: -0.06em;
 }
 
-.recent-section {
-  margin-top: 10px;
-}
-
-.order-list {
-  display: grid;
-  gap: 12px;
-}
-
-.order-list-item {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 16px 18px;
-  transition: 180ms ease;
-}
-
-.order-list-item:hover {
-  transform: translateY(-2px);
-  border-color: rgba(15, 118, 110, 0.18);
-}
-
 .form-box {
   padding: 20px;
   margin-bottom: 24px;
@@ -420,6 +398,14 @@ textarea {
   margin-bottom: 16px;
 }
 
+.cart-empty {
+  padding: 14px;
+  border-radius: var(--radius-lg);
+  background: var(--panel-strong);
+  border: 1px dashed var(--line);
+  color: var(--muted);
+}
+
 .cart-row {
   display: flex;
   justify-content: space-between;
@@ -430,9 +416,10 @@ textarea {
   background: var(--panel-strong);
 }
 
-.cart-row > div:last-child {
+.cart-actions {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .cart-summary {

@@ -70,6 +70,13 @@ function renderCart() {
   wrap.innerHTML = '';
   let total = 0;
 
+  if (cart.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'cart-empty';
+    empty.textContent = 'Nessun prodotto nel carrello';
+    wrap.appendChild(empty);
+  }
+
   cart.forEach((it, i) => {
     total += it.qty * it.prezzo;
     const el = document.createElement('div');
@@ -79,10 +86,10 @@ function renderCart() {
         <strong>${it.nome}</strong><br>
         ${it.confezione_nome} — ${it.qty} x €${it.prezzo.toFixed(2)}
       </div>
-      <div>
+      <div class="cart-actions">
         <button type="button" onclick="dec(${i})">-</button>
         <button type="button" onclick="inc(${i})">+</button>
-        <button type="button" onclick="rm(${i})">x</button>
+        <button type="button" onclick="rm(${i})">Rimuovi</button>
       </div>
     `;
     wrap.appendChild(el);
@@ -195,5 +202,7 @@ document.getElementById('place-order').addEventListener('click', async () => {
     alert(j.error || 'Errore ordine');
   }
 });
+
+renderCart();
 </script>
 {% endblock %}

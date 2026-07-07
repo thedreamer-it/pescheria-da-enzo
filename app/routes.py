@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, jsonify
+from flask import Blueprint, render_template, request, jsonify
 from . import db
 from .models import Cliente, Prodotto, Confezione, Ordine, RigaOrdine
 
@@ -70,20 +70,15 @@ def seed_demo_data():
             db.session.add(prodotto)
             db.session.flush()
 
-        confezioni_esistenti = {
-            c.nome for c in Confezione.query.filter_by(prodotto_id=prodotto.id).all()
-        }
-
+        confezioni_esistenti = {c.nome for c in Confezione.query.filter_by(prodotto_id=prodotto.id).all()}
         for nome_conf, moltiplicatore in [("Base", 1), ("Confezione x2", 2), ("Confezione x5", 5)]:
             if nome_conf not in confezioni_esistenti:
-                db.session.add(
-                    Confezione(
-                        prodotto_id=prodotto.id,
-                        nome=nome_conf,
-                        moltiplicatore=moltiplicatore,
-                        prezzo_extra=0,
-                    )
-                )
+                db.session.add(Confezione(
+                    prodotto_id=prodotto.id,
+                    nome=nome_conf,
+                    moltiplicatore=moltiplicatore,
+                    prezzo_extra=0,
+                ))
 
     db.session.commit()
 
