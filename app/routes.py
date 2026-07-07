@@ -4,6 +4,7 @@ from .models import Cliente, Prodotto, Confezione, Ordine, RigaOrdine
 
 main = Blueprint("main", __name__)
 
+
 def seed_demo_data():
     demo = [
         {
@@ -13,7 +14,7 @@ def seed_demo_data():
             "prezzo_pubblico": 14.90,
             "giacenza": 48,
             "unita_misura": "pz",
-            "descrizione": "Orata fresca da banco"
+            "descrizione": "Orata fresca da banco",
         },
         {
             "nome": "Spigola",
@@ -22,7 +23,7 @@ def seed_demo_data():
             "prezzo_pubblico": 16.50,
             "giacenza": 36,
             "unita_misura": "pz",
-            "descrizione": "Spigola fresca ideale al forno"
+            "descrizione": "Spigola fresca ideale al forno",
         },
         {
             "nome": "Gamberi Rossi",
@@ -31,7 +32,7 @@ def seed_demo_data():
             "prezzo_pubblico": 28.00,
             "giacenza": 20,
             "unita_misura": "kg",
-            "descrizione": "Gamberi rossi selezionati"
+            "descrizione": "Gamberi rossi selezionati",
         },
         {
             "nome": "Calamari",
@@ -40,7 +41,7 @@ def seed_demo_data():
             "prezzo_pubblico": 18.50,
             "giacenza": 15,
             "unita_misura": "kg",
-            "descrizione": "Calamari freschi"
+            "descrizione": "Calamari freschi",
         },
         {
             "nome": "Salmone",
@@ -49,7 +50,7 @@ def seed_demo_data():
             "prezzo_pubblico": 22.00,
             "giacenza": 24,
             "unita_misura": "tranci",
-            "descrizione": "Tranci di salmone"
+            "descrizione": "Tranci di salmone",
         },
     ]
 
@@ -73,14 +74,17 @@ def seed_demo_data():
         confezioni_esistenti = {c.nome for c in Confezione.query.filter_by(prodotto_id=prodotto.id).all()}
         for nome_conf, moltiplicatore in [("Base", 1), ("Confezione x2", 2), ("Confezione x5", 5)]:
             if nome_conf not in confezioni_esistenti:
-                db.session.add(Confezione(
-                    prodotto_id=prodotto.id,
-                    nome=nome_conf,
-                    moltiplicatore=moltiplicatore,
-                    prezzo_extra=0,
-                ))
+                db.session.add(
+                    Confezione(
+                        prodotto_id=prodotto.id,
+                        nome=nome_conf,
+                        moltiplicatore=moltiplicatore,
+                        prezzo_extra=0,
+                    )
+                )
 
     db.session.commit()
+
 
 @main.route("/")
 def dashboard():
@@ -90,7 +94,15 @@ def dashboard():
     ordini = Ordine.query.count()
     da_preparare = Ordine.query.filter(Ordine.stato != "evaso").count()
     recenti = Ordine.query.order_by(Ordine.data_ordine.desc()).limit(5).all()
-    return render_template("dashboard.html", clienti=clienti, prodotti=prodotti, ordini=ordini, da_preparare=da_preparare, recenti=recenti)
+    return render_template(
+        "dashboard.html",
+        clienti=clienti,
+        prodotti=prodotti,
+        ordini=ordini,
+        da_preparare=da_preparare,
+        recenti=recenti,
+    )
+
 
 @main.route("/nuovo-ordine")
 def nuovo_ordine():
@@ -98,6 +110,78 @@ def nuovo_ordine():
     prodotti = Prodotto.query.order_by(Prodotto.nome.asc()).all()
     clienti = Cliente.query.order_by(Cliente.nome.asc()).all()
     return render_template("nuovo_ordine.html", prodotti=prodotti, clienti=clienti)
+
+
+@main.route("/ordini")
+def ordini():
+    lista = Ordine.query.order_by(Ordine.data_ordine.desc()).all()
+    return render_template("ordini.html", ordini=lista)
+
+
+@main.route("/ordini/<int:ordine_id>")
+def ordine_dettaglio(ordine_id):
+    ordine = Ordine.query.get_or_404(ordine_id)
+    return render_template("ordine_dettaglio.html", ordine=ordine)
+
+
+@main.route("/prodotti", methods=["GET", "POST"])
+def prodotti():
+    seed_demo_data()
+
+    if request.method == "POST":
+        nome = request.form.get("nome", "").strip()
+        if nome:
+            prodotto = Prodotto(
+                nome=nome,
+                image_url=request.form.get("image_url", "").strip() or None,
+                costo=float(request.form.get("costo") or 0),
+                prezzo_pubblico=float(request.form.get("prezzo_pubblico") or 0),
+                giacenza=float(request.form.get("giacenza") or 0),
+                disponibile=True,
+                unita_misura=request.form.get("unita_misura", "pz").strip() or "pz",
+                descrizione=request.form.get("descrizione", "").strip() or None,
+            )
+            db.session.add(prodotto)
+            db.session.flush()
+            db.session.add(
+                Confezione(
+                    prodotto_id=prodotto.id,
+                    nome="Base",
+                    moltiplicatore=1,
+                    prezzo_extra=0,
+                )
+            )
+            db.session.commit()
+
+    lista = Prodotto.query.order_by(Prodotto.nome.asc()).all()
+    return render_template("prodotti.html", prodotti=lista)
+
+
+@main.route("/clienti", methods=["GET", "POST"])
+def clienti():
+    if request.method == "POST":
+        nome = request.form.get("nome", "").strip()
+        if nome:
+            cliente = Cliente(
+                nome=nome,
+                telefono=request.form.get("telefono", "").strip() or None,
+                via=request.form.get("via", "").strip() or None,
+                citta=request.form.get("citta", "").strip() or None,
+                cap=request.form.get("cap", "").strip() or None,
+                note=request.form.get("note", "").strip() or None,
+            )
+            db.session.add(cliente)
+            db.session.commit()
+
+    lista = Cliente.query.order_by(Cliente.nome.asc()).all()
+    return render_template("clienti.html", clienti=lista)
+
+
+@main.route("/listino")
+def listino():
+    prodotti_lista = Prodotto.query.order_by(Prodotto.nome.asc()).all()
+    return render_template("listino.html", prodotti=prodotti_lista)
+
 
 @main.route("/api/ordina", methods=["POST"])
 def api_ordina():
@@ -131,19 +215,20 @@ def api_ordina():
         prezzo = float(it.get("prezzo_unit", p.prezzo_pubblico if p else 0))
         totale += qty * prezzo
 
-        db.session.add(RigaOrdine(
-            ordine_id=ordine.id,
-            prodotto_id=p.id,
-            confezione_id=confezione.id if confezione else None,
-            quantita=qty,
-            prezzo_unitario=prezzo,
-            quantita_magazzino=qty_magazzino
-        ))
+        db.session.add(
+            RigaOrdine(
+                ordine_id=ordine.id,
+                prodotto_id=p.id,
+                confezione_id=confezione.id if confezione else None,
+                quantita=qty,
+                prezzo_unitario=prezzo,
+                quantita_magazzino=qty_magazzino,
+            )
+        )
 
         p.giacenza = max(0, (p.giacenza or 0) - qty_magazzino)
         p.disponibile = p.giacenza > 0
 
     ordine.totale = totale
     db.session.commit()
-
     return jsonify({"ok": True, "ordine_id": ordine.id})
