@@ -1,52 +1,36 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#0f766e">
-  <title>Pescheria da Enzo</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Pescheria da Enzo{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-  <div class="mobile-topbar">
-    <div class="mobile-brand">Pescheria da Enzo</div>
-    <div class="mobile-badge">Gestionale</div>
-  </div>
-
   <div class="app-shell">
     <aside class="sidebar">
-      <div class="sidebar-brand">
-        <div class="brand-mark">PE</div>
-        <div>
-          <h1>Pescheria da Enzo</h1>
-          <p>Ordini, magazzino, clienti</p>
-        </div>
+      <div class="brand-block">
+        <span class="brand-kicker">Gestione negozio</span>
+        <h1>Pescheria da Enzo</h1>
+        <p>Ordini, clienti e magazzino in un solo pannello.</p>
       </div>
 
-      <nav>
-        <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
-        <a href="{{ url_for('main.nuovo_ordine') }}">Nuovo ordine</a>
-        <a href="{{ url_for('main.ordini') }}">Ordini</a>
-        <a href="{{ url_for('main.listino') }}">Listino</a>
-        <a href="{{ url_for('main.prodotti') }}">Magazzino</a>
-        <a href="{{ url_for('main.clienti') }}">Clienti</a>
+      <nav class="sidebar-nav">
+        <a href="{{ url_for('main.dashboard') }}" class="{% if request.endpoint == 'main.dashboard' %}active{% endif %}">Dashboard</a>
+        <a href="{{ url_for('main.nuovo_ordine') }}" class="{% if request.endpoint == 'main.nuovo_ordine' %}active{% endif %}">Nuovo ordine</a>
+        <a href="{{ url_for('main.prodotti') }}" class="{% if request.endpoint == 'main.prodotti' %}active{% endif %}">Magazzino</a>
+        <a href="{{ url_for('main.clienti') }}" class="{% if request.endpoint == 'main.clienti' %}active{% endif %}">Clienti</a>
+        <a href="{{ url_for('main.ordini') }}" class="{% if request.endpoint == 'main.ordini' %}active{% endif %}">Ordini</a>
       </nav>
-
-      <div class="sidebar-footer">
-        <div class="sidebar-note">Versione elegante e responsive</div>
-      </div>
     </aside>
 
     <main class="main-area">
       <header class="main-header">
         <div>
-          <div class="eyebrow">App gestionale</div>
-          <div class="logo">Pescheria da Enzo</div>
+          <div class="page-eyebrow">Pescheria da Enzo</div>
+          <div class="header-title">{% block header_title %}Pannello operativo{% endblock %}</div>
         </div>
-        <div class="header-pill">Desktop + mobile</div>
+        <div class="header-badge">Online</div>
       </header>
 
       <section class="page">
@@ -55,12 +39,11 @@
     </main>
   </div>
 
-  <div class="bottom-nav">
-    <a href="{{ url_for('main.dashboard') }}">Home</a>
-    <a href="{{ url_for('main.nuovo_ordine') }}">Ordine</a>
-    <a href="{{ url_for('main.ordini') }}">Ordini</a>
-    <a href="{{ url_for('main.prodotti') }}">Magazzino</a>
-    <a href="{{ url_for('main.clienti') }}">Clienti</a>
-  </div>
+  <nav class="mobile-bottom-nav">
+    <a href="{{ url_for('main.dashboard') }}" class="{% if request.endpoint == 'main.dashboard' %}active{% endif %}">Home</a>
+    <a href="{{ url_for('main.nuovo_ordine') }}" class="{% if request.endpoint == 'main.nuovo_ordine' %}active{% endif %}">Ordine</a>
+    <a href="{{ url_for('main.prodotti') }}" class="{% if request.endpoint == 'main.prodotti' %}active{% endif %}">Magazzino</a>
+    <a href="{{ url_for('main.ordini') }}" class="{% if request.endpoint == 'main.ordini' %}active{% endif %}">Ordini</a>
+  </nav>
 </body>
 </html>

@@ -1,31 +1,52 @@
 {% extends "base.html" %}
+{% block title %}Ordini - Pescheria da Enzo{% endblock %}
+{% block header_title %}Ordini{% endblock %}
 {% block content %}
-<h2>Ordini</h2>
 
-<div class="table-card">
-  <table>
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Cliente</th>
-        <th>Stato</th>
-        <th>Totale</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for o in ordini %}
-      <tr>
-        <td><a href="{{ url_for('main.ordine_dettaglio', ordine_id=o.id) }}">#{{ o.id }}</a></td>
-        <td>{{ o.cliente.nome if o.cliente else 'Senza cliente' }}</td>
-        <td>{{ o.stato }}</td>
-        <td>€ {{ '%.2f'|format(o.totale or 0) }}</td>
-      </tr>
-      {% else %}
-      <tr>
-        <td colspan="4">Nessun ordine presente</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+<div class="page-top">
+  <div>
+    <h2 class="page-title">Gestione ordini</h2>
+    <p class="page-subtitle">Consulta gli ordini registrati e controlla rapidamente stato, totale e note.</p>
+  </div>
 </div>
+
+<section class="surface-card">
+  <div class="panel-head">
+    <div>
+      <div class="section-kicker">Archivio</div>
+      <h3>Elenco ordini</h3>
+    </div>
+  </div>
+
+  <div class="table-shell">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Cliente</th>
+          <th>Data</th>
+          <th>Stato</th>
+          <th>Totale</th>
+          <th>Note</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ordine in ordini %}
+        <tr>
+          <td data-label="ID">#{{ ordine.id }}</td>
+          <td data-label="Cliente">{{ ordine.cliente.nome if ordine.cliente else '-' }}</td>
+          <td data-label="Data">{{ ordine.data_ordine.strftime('%d/%m/%Y %H:%M') }}</td>
+          <td data-label="Stato"><span class="status-pill">{{ ordine.stato }}</span></td>
+          <td data-label="Totale">€ {{ '%.2f'|format(ordine.totale) }}</td>
+          <td data-label="Note">{{ ordine.note if ordine.note else '-' }}</td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="6">Nessun ordine presente.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
 {% endblock %}

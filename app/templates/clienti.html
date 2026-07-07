@@ -1,61 +1,48 @@
 {% extends "base.html" %}
+{% block title %}Clienti - Pescheria da Enzo{% endblock %}
+{% block header_title %}Clienti{% endblock %}
 {% block content %}
-<h2>Clienti</h2>
 
-<div class="form-box">
-  <form method="post" class="form-grid">
-    <div>
-      <label>Nome</label>
-      <input name="nome" required>
-    </div>
-    <div>
-      <label>Telefono</label>
-      <input name="telefono">
-    </div>
-    <div>
-      <label>Via</label>
-      <input name="via">
-    </div>
-    <div>
-      <label>Città</label>
-      <input name="citta">
-    </div>
-    <div>
-      <label>CAP</label>
-      <input name="cap">
-    </div>
-    <div style="grid-column: 1 / -1;">
-      <label>Note</label>
-      <textarea name="note" rows="3"></textarea>
-    </div>
-    <div style="grid-column: 1 / -1;">
-      <button class="btn-primary" type="submit">Salva cliente</button>
-    </div>
-  </form>
+<div class="page-top">
+  <div>
+    <h2 class="page-title">Clienti</h2>
+    <p class="page-subtitle">Anagrafiche clienti organizzate in modo più leggibile, pulito e ordinato.</p>
+  </div>
 </div>
 
-<div class="table-card">
-  <table>
-    <thead>
-      <tr>
-        <th>Nome</th>
-        <th>Telefono</th>
-        <th>Città</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for c in clienti %}
-      <tr>
-        <td>{{ c.nome }}</td>
-        <td>{{ c.telefono or '-' }}</td>
-        <td>{{ c.citta or '-' }}</td>
-      </tr>
-      {% else %}
-      <tr>
-        <td colspan="3">Nessun cliente presente</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
+<section class="surface-card">
+  <div class="panel-head">
+    <div>
+      <div class="section-kicker">Rubrica</div>
+      <h3>Elenco clienti</h3>
+    </div>
+  </div>
+
+  <div class="table-shell">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Telefono</th>
+          <th>Email</th>
+          <th>Indirizzo</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for cliente in clienti %}
+        <tr>
+          <td data-label="Nome">{{ cliente.nome }}</td>
+          <td data-label="Telefono">{{ cliente.telefono if cliente.telefono else '-' }}</td>
+          <td data-label="Email">{{ cliente.email if cliente.email else '-' }}</td>
+          <td data-label="Indirizzo">{{ cliente.indirizzo if cliente.indirizzo else '-' }}</td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="4">Nessun cliente presente.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
 {% endblock %}
