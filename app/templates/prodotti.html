@@ -1,55 +1,123 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>Magazzino</h2>
 
-<form method="POST" class="form-box">
+<div class="page-head">
+  <div>
+    <p class="eyebrow">Magazzino</p>
+    <h2 class="page-title">Prodotti</h2>
+    <p class="page-subtitle">
+      Inserisci costi, prezzi e giacenze in modo coerente con il database.
+    </p>
+  </div>
+</div>
+
+<section class="card" style="margin-bottom: 18px;">
+  <div class="section-head">
+    <h3>Nuovo prodotto</h3>
+  </div>
+
+  <form
+    method="POST"
+    class="form-box"
+    style="padding: 0; margin: 0; border: 0; box-shadow: none; background: transparent;"
+  >
     <div class="form-grid">
-        <div>
-            <label for="nome">Prodotto</label>
-            <input type="text" id="nome" name="nome" required>
-        </div>
+      <div>
+        <label for="nome">Prodotto</label>
+        <input type="text" id="nome" name="nome" required>
+      </div>
 
-        <div>
-            <label for="unita_misura">Unità</label>
-            <input type="text" id="unita_misura" name="unita_misura" value="kg" required>
-        </div>
+      <div>
+        <label for="unita_misura">Unità</label>
+        <input type="text" id="unita_misura" name="unita_misura" value="kg" required>
+      </div>
 
-        <div>
-            <label for="prezzo">Prezzo</label>
-            <input type="number" step="0.01" id="prezzo" name="prezzo" required>
-        </div>
+      <div>
+        <label for="costo">Costo</label>
+        <input type="number" step="0.01" id="costo" name="costo" required>
+      </div>
 
-        <div>
-            <label for="giacenza">Giacenza</label>
-            <input type="number" step="0.01" id="giacenza" name="giacenza" required>
-        </div>
+      <div>
+        <label for="prezzo_pubblico">Prezzo pubblico</label>
+        <input type="number" step="0.01" id="prezzo_pubblico" name="prezzo_pubblico" required>
+      </div>
+
+      <div>
+        <label for="giacenza">Giacenza</label>
+        <input type="number" step="0.01" id="giacenza" name="giacenza" required>
+      </div>
+
+      <div>
+        <label for="image_url">Immagine URL</label>
+        <input type="text" id="image_url" name="image_url">
+      </div>
     </div>
 
-    <button type="submit" class="btn-primary">Aggiungi prodotto</button>
-</form>
+    <div style="margin-top: 12px;">
+      <label for="descrizione">Descrizione</label>
+      <textarea id="descrizione" name="descrizione" rows="3"></textarea>
+    </div>
 
-<table>
+    <div style="margin-top: 16px;">
+      <button type="submit" class="btn-primary">Aggiungi prodotto</button>
+    </div>
+  </form>
+</section>
+
+<section class="card table-card">
+  <div class="section-head">
+    <h3>Elenco prodotti</h3>
+  </div>
+
+  <table>
     <thead>
-        <tr>
-            <th>Prodotto</th>
-            <th>Unità</th>
-            <th>Prezzo</th>
-            <th>Giacenza</th>
-        </tr>
+      <tr>
+        <th>Prodotto</th>
+        <th>Unità</th>
+        <th>Costo</th>
+        <th>Prezzo pubblico</th>
+        <th>Giacenza</th>
+        <th>Disponibile</th>
+        <th>Azioni</th>
+      </tr>
     </thead>
     <tbody>
-        {% for prodotto in prodotti %}
-        <tr>
-            <td>{{ prodotto.nome }}</td>
-            <td>{{ prodotto.unita_misura or '-' }}</td>
-            <td>€ {{ '%.2f'|format(prodotto.prezzo|default(0, true)) }}</td>
-            <td>{{ prodotto.giacenza|default(0, true) }}</td>
-        </tr>
-        {% else %}
-        <tr>
-            <td colspan="4">Nessun prodotto presente.</td>
-        </tr>
-        {% endfor %}
+      {% for prodotto in prodotti %}
+      <tr>
+        <td>
+          <strong>{{ prodotto.nome }}</strong>
+          {% if prodotto.descrizione %}
+            <div class="muted" style="margin-top: 4px;">{{ prodotto.descrizione }}</div>
+          {% endif %}
+        </td>
+        <td>{{ prodotto.unita_misura or '-' }}</td>
+        <td>€ {{ '%.2f'|format(prodotto.costo|default(0, true)) }}</td>
+        <td>€ {{ '%.2f'|format(prodotto.prezzo_pubblico|default(0, true)) }}</td>
+        <td>{{ prodotto.giacenza|default(0, true) }}</td>
+        <td>
+          {% if prodotto.disponibile %}
+            <span class="status-badge status-evaso">Sì</span>
+          {% else %}
+            <span class="status-badge status-vuoto">No</span>
+          {% endif %}
+        </td>
+        <td>
+          <a
+            href="{{ url_for('main.modifica_prodotto', prodotto_id=prodotto.id) }}"
+            class="btn-primary"
+            style="text-decoration: none; display: inline-block;"
+          >
+            Modifica
+          </a>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="7">Nessun prodotto presente.</td>
+      </tr>
+      {% endfor %}
     </tbody>
-</table>
+  </table>
+</section>
+
 {% endblock %}

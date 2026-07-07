@@ -1,38 +1,225 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>Ordine #{{ ordine.id }}</h2>
 
-<div class="detail-card">
-  <p><strong>Cliente:</strong> {{ ordine.cliente.nome if ordine.cliente else 'Senza cliente' }}</p>
-  <p><strong>Stato:</strong> {{ ordine.stato }}</p>
-  <p><strong>Totale:</strong> € {{ '%.2f'|format(ordine.totale or 0) }}</p>
-  <p><strong>Note:</strong> {{ ordine.note or '-' }}</p>
-</div>
+<section class="page-head">
+  <p class="eyebrow">Dettaglio ordine</p>
+  <h1 class="page-title">Ordine #{{ ordine.id }}</h1>
+  <p class="page-subtitle">
+    Cliente:
+    <strong>{{ ordine.cliente.nome if ordine.cliente else "Cliente non associato" }}</strong>
+    ·
+    Data: {{ ordine.data_ordine.strftime("%d/%m/%Y %H:%M") if ordine.data_ordine else "-" }}
+  </p>
+</section>
 
-<div class="table-card" style="margin-top: 18px;">
-  <table>
-    <thead>
-      <tr>
-        <th>Prodotto</th>
-        <th>Confezione</th>
-        <th>Quantità</th>
-        <th>Prezzo</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for r in ordine.righe %}
-      <tr>
-        <td>{{ r.prodotto.nome }}</td>
-        <td>{{ r.confezione.nome if r.confezione else '-' }}</td>
-        <td>{{ r.quantita }}</td>
-        <td>€ {{ '%.2f'|format(r.prezzo_unitario) }}</td>
-      </tr>
+<section class="card">
+  <div class="card-head">
+    <div>
+      <h3>Stato ordine</h3>
+      <p class="muted">Aggiorna rapidamente lo stato generale e verifica la consegna.</p>
+    </div>
+
+    <div class="order-header-actions">
+      <span class="status-badge status-{{ ordine.stato }}">
+        {{ ordine.stato|replace("_", " ")|title }}
+      </span>
+
+      {% if ordine.consegnato %}
+        <span class="status-badge status-evaso">Consegnato</span>
       {% else %}
-      <tr>
-        <td colspan="4">Nessuna riga presente</td>
-      </tr>
+        <span class="status-badge status-vuoto">Da consegnare</span>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="status-actions">
+    <form method="post">
+      <input type="hidden" name="action" value="stato">
+      <input type="hidden" name="stato" value="nuovo">
+      <button type="submit" class="btn-primary">Nuovo</button>
+    </form>
+
+    <form method="post">
+      <input type="hidden" name="action" value="stato">
+      <input type="hidden" name="stato" value="in_preparazione">
+      <button type="submit" class="btn-primary">In preparazione</button>
+    </form>
+
+    <form method="post">
+      <input type="hidden" name="action" value="stato">
+      <input type="hidden" name="stato" value="evaso">
+      <button type="submit" class="btn-primary">Segna come evaso</button>
+    </form>
+  </div>
+</section>
+
+<!-- Nuovo blocco: aggiunta prodotto a ordine esistente -->
+<section class="card">
+  <div class="section-head">
+    <h3>Aggiungi prodotto</h3>
+  </div>
+  <p class="page-subtitle">Seleziona un prodotto dal magazzino e aggiungilo a questo ordine.</p>
+
+  <form method="post" class="inline-form row-edit-form">
+    <input type="hidden" name="action" value="add_riga">
+
+    <label>
+      Prodotto
+      <select name="prodotto_id" required>
+        <option value="">Seleziona prodotto</option>
+        {% for prodotto in prodotti %}
+          <option value="{{ prodotto.id }}">
+            {{ prodotto.nome }}
+            {% if prodotto.unita_misura %}({{ prodotto.unita_misura }}){% endif %}
+          </option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <!-- Per ora lasciamo la confezione opzionale e semplice -->
+    <label>
+      ID confezione (facoltativo)
+      <input type="number" name="confezione_id" min="1" step="1">
+    </label>
+
+    <label>
+      Quantità
+      <input
+        type="number"
+        name="quantita"
+        step="0.01"
+        min="0.01"
+        value="1"
+        required
+      >
+    </label>
+
+    <button type="submit" class="btn-primary">Aggiungi prodotto</button>
+  </form>
+</section>
+
+<section class="card">
+  <div class="section-head">
+    <h3>Righe ordine</h3>
+  </div>
+  <p class="page-subtitle">Puoi modificare quantità, segnare la riga come evasa oppure eliminarla.</p>
+
+  {% if ordine.righe %}
+    <div class="order-lines">
+      {% for riga in ordine.righe %}
+        <article class="order-line {% if riga.evaso %}is-done{% endif %}">
+          <div class="order-line-main">
+            <div>
+              <h3 class="cart-item-title">
+                {{ riga.prodotto.nome if riga.prodotto else "Prodotto rimosso" }}
+              </h3>
+              <p class="cart-item-meta">
+                {% if riga.confezione %}
+                  {{ riga.confezione.nome }} ·
+                {% endif %}
+                Prezzo unitario: € {{ "%.2f"|format(riga.prezzo_unitario or 0) }}
+                ·
+                Magazzino: {{ "%.2f"|format(riga.quantita_magazzino or 0) }}
+              </p>
+            </div>
+
+            <div class="line-badges">
+              {% if riga.evaso %}
+                <span class="status-badge status-evaso">Evasa</span>
+              {% else %}
+                <span class="status-badge status-in_preparazione">Aperta</span>
+              {% endif %}
+
+              {% if riga.modificato %}
+                <span class="status-badge">Modificata</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="order-line-actions">
+            <form method="post" class="inline-form row-edit-form">
+              <input type="hidden" name="action" value="riga">
+              <input type="hidden" name="riga_id" value="{{ riga.id }}">
+
+              <label>
+                Quantità
+                <input
+                  type="number"
+                  name="quantita"
+                  step="0.01"
+                  min="0"
+                  value="{{ riga.quantita }}"
+                  required
+                >
+              </label>
+
+              <label class="checkbox-label">
+                <input
+                  type="checkbox"
+                  name="evaso"
+                  value="1"
+                  {% if riga.evaso %}checked{% endif %}
+                >
+                Riga evasa
+              </label>
+
+              <button type="submit" class="btn-primary">Salva riga</button>
+            </form>
+
+            <form
+              method="post"
+              class="inline-form delete-form"
+              onsubmit="return confirm('Vuoi davvero eliminare questa riga?');"
+            >
+              <input type="hidden" name="action" value="delete_riga">
+              <input type="hidden" name="riga_id" value="{{ riga.id }}">
+              <button type="submit" class="remove-item">Elimina riga</button>
+            </form>
+          </div>
+        </article>
       {% endfor %}
-    </tbody>
-  </table>
-</div>
+    </div>
+  {% else %}
+    <div class="empty-cart">
+      <div class="empty-cart-title">Nessuna riga presente</div>
+      <div class="empty-cart-text">Questo ordine non contiene ancora prodotti associati.</div>
+    </div>
+  {% endif %}
+</section>
+
+<section class="order-summary-grid">
+  <div class="card">
+    <div class="section-head">
+      <h3>Riepilogo</h3>
+    </div>
+
+    <div class="summary-list">
+      <div class="summary-row">
+        <span>Totale ordine</span>
+        <strong>€ {{ "%.2f"|format(ordine.totale or 0) }}</strong>
+      </div>
+      <div class="summary-row">
+        <span>Numero righe</span>
+        <strong>{{ ordine.righe|length }}</strong>
+      </div>
+      <div class="summary-row">
+        <span>Righe evase</span>
+        <strong>{{ ordine.righe|selectattr("evaso")|list|length }}</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-head">
+      <h3>Note ordine</h3>
+    </div>
+
+    {% if ordine.note %}
+      <p>{{ ordine.note }}</p>
+    {% else %}
+      <p class="muted">Nessuna nota presente.</p>
+    {% endif %}
+  </div>
+</section>
+
 {% endblock %}

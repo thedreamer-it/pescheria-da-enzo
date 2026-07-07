@@ -3,31 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0f3f53">
     <title>Pescheria da Enzo</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+  {% set endpoint = request.endpoint or '' %}
+
   <div class="app-shell">
+    <!-- Sidebar desktop -->
     <aside class="sidebar">
-      <h1>Pescheria</h1>
-      <nav>
-        <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
-        <a href="{{ url_for('main.nuovo_ordine') }}">Nuovo ordine</a>
-        <a href="{{ url_for('main.prodotti') }}">Magazzino</a>
-        <a href="{{ url_for('main.clienti') }}">Clienti</a>
-        <a href="{{ url_for('main.ordini') }}">Ordini</a>
+      <div class="sidebar-brand">
+        <h1>Pescheria</h1>
+        <p>da Enzo</p>
+      </div>
+
+      <nav class="sidebar-nav" aria-label="Navigazione principale desktop">
+        <a href="{{ url_for('main.dashboard') }}" class="{% if endpoint == 'main.dashboard' %}active{% endif %}">
+          Dashboard
+        </a>
+
+        <a href="{{ url_for('main.nuovo_ordine') }}" class="{% if endpoint == 'main.nuovo_ordine' %}active{% endif %}">
+          Nuovo ordine
+        </a>
+
+        <a href="{{ url_for('main.prodotti') }}" class="{% if endpoint == 'main.prodotti' or endpoint == 'main.modifica_prodotto' %}active{% endif %}">
+          Magazzino
+        </a>
+
+        <a href="{{ url_for('main.clienti') }}" class="{% if endpoint == 'main.clienti' %}active{% endif %}">
+          Clienti
+        </a>
+
+        <a href="{{ url_for('main.ordini') }}" class="{% if endpoint == 'main.ordini' or endpoint == 'main.ordine_dettaglio' %}active{% endif %}">
+          Ordini
+        </a>
       </nav>
     </aside>
 
     <main class="main-area">
       <header class="main-header">
-        <div class="logo">Pescheria da Enzo</div>
+        <div class="logo-wrap">
+          <div class="logo">Pescheria da Enzo</div>
+          <p class="logo-sub">Gestione ordini, clienti e magazzino</p>
+        </div>
       </header>
 
       <section class="page">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="flash-stack">
+              {% for category, message in messages %}
+                <div class="flash-message flash-{{ category }}">{{ message }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
         {% block content %}{% endblock %}
       </section>
     </main>
   </div>
+
+  <!-- Navigazione mobile -->
+  <nav class="mobile-bottom-nav" aria-label="Navigazione principale mobile">
+    <a href="{{ url_for('main.dashboard') }}" class="{% if endpoint == 'main.dashboard' %}active{% endif %}">
+      Home
+    </a>
+
+    <a href="{{ url_for('main.ordini') }}" class="{% if endpoint == 'main.ordini' or endpoint == 'main.ordine_dettaglio' or endpoint == 'main.nuovo_ordine' %}active{% endif %}">
+      Ordini
+    </a>
+
+    <a href="{{ url_for('main.prodotti') }}" class="{% if endpoint == 'main.prodotti' or endpoint == 'main.modifica_prodotto' %}active{% endif %}">
+      Magazzino
+    </a>
+
+    <a href="{{ url_for('main.clienti') }}" class="{% if endpoint == 'main.clienti' %}active{% endif %}">
+      Clienti
+    </a>
+  </nav>
 </body>
 </html>
