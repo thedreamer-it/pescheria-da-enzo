@@ -4,15 +4,15 @@
 
 <div class="dash-grid">
   <div class="stat-card">
-    <div class="stat-title">Clienti registrati</div>
+    <div class="stat-title">Clienti</div>
     <div class="stat-value">{{ clienti }}</div>
   </div>
   <div class="stat-card">
-    <div class="stat-title">Prodotti in archivio</div>
+    <div class="stat-title">Prodotti</div>
     <div class="stat-value">{{ prodotti }}</div>
   </div>
   <div class="stat-card">
-    <div class="stat-title">Ordini totali</div>
+    <div class="stat-title">Ordini</div>
     <div class="stat-value">{{ ordini }}</div>
   </div>
   <div class="stat-card">
@@ -21,23 +21,30 @@
   </div>
 </div>
 
-<section class="recent-section">
-  <h3>Ultimi ordini</h3>
-  <div class="order-list">
-    {% for o in recenti %}
-    <a class="order-list-item" href="{{ url_for('main.ordine_dettaglio', order_id=o.id) }}">
-      <div>
-        <strong>#{{ o.id }}</strong><br>
-        {{ o.cliente.nome if o.cliente else 'Cliente non associato' }}
-      </div>
-      <div>
-        € {{ '%.2f'|format(o.totale) }}<br>
-        <span class="badge {{ 'on' if o.stato == 'evaso' else 'off' if o.stato == 'nuovo' else '' }}">{{ o.stato }}</span>
-      </div>
-    </a>
-    {% else %}
-    <div class="empty">Nessun ordine recente.</div>
-    {% endfor %}
-  </div>
-</section>
+<div class="table-card">
+  <table>
+    <thead>
+      <tr>
+        <th>Ordine</th>
+        <th>Data</th>
+        <th>Cliente</th>
+        <th>Totale</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for o in recenti %}
+      <tr>
+        <td><a href="{{ url_for('main.ordine_dettaglio', ordine_id=o.id) }}">#{{ o.id }}</a></td>
+        <td>{{ o.data_ordine.strftime('%d/%m/%Y %H:%M') }}</td>
+        <td>{{ o.cliente.nome if o.cliente else 'Senza cliente' }}</td>
+        <td>€ {{ '%.2f'|format(o.totale or 0) }}</td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="4">Nessun ordine recente</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 {% endblock %}

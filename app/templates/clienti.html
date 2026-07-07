@@ -2,8 +2,8 @@
 {% block content %}
 <h2>Clienti</h2>
 
-<form method="POST" class="form-box">
-  <div class="form-grid">
+<div class="form-box">
+  <form method="post" class="form-grid">
     <div>
       <label>Nome</label>
       <input name="nome" required>
@@ -24,36 +24,38 @@
       <label>CAP</label>
       <input name="cap">
     </div>
-    <div style="grid-column:1 / -1">
+    <div style="grid-column: 1 / -1;">
       <label>Note</label>
       <textarea name="note" rows="3"></textarea>
     </div>
-  </div>
-  <button type="submit" class="btn-primary">Aggiungi cliente</button>
-</form>
+    <div style="grid-column: 1 / -1;">
+      <button class="btn-primary" type="submit">Salva cliente</button>
+    </div>
+  </form>
+</div>
 
-<table>
-  <thead>
-    <tr>
-      <th>Nome</th>
-      <th>Telefono</th>
-      <th>Indirizzo</th>
-      <th>Note</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for cliente in clienti %}
-    <tr>
-      <td>{{ cliente.nome }}</td>
-      <td>{{ cliente.telefono or '-' }}</td>
-      <td>{{ cliente.via or '-' }}, {{ cliente.citta or '-' }} {{ cliente.cap or '' }}</td>
-      <td>{{ cliente.note or '-' }}</td>
-    </tr>
-    {% else %}
-    <tr>
-      <td colspan="4">Nessun cliente presente.</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+<div class="table-card">
+  <table>
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>Telefono</th>
+        <th>Città</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in clienti %}
+      <tr>
+        <td>{{ c.nome }}</td>
+        <td>{{ c.telefono or '-' }}</td>
+        <td>{{ c.citta or '-' }}</td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="3">Nessun cliente presente</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 {% endblock %}

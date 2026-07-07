@@ -1,199 +1,67 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>Nuovo ordine</h2>
+<h2>Magazzino prodotti</h2>
 
-<div class="order-wrap">
-  <aside class="prod-list">
-    <input id="search" placeholder="Cerca prodotto..." class="search">
-
-    <div class="prod-grid" id="product-grid">
-      {% for p in prodotti %}
-      <div class="prod-card"
-           data-id="{{ p.id }}"
-           data-prezzo="{{ p.prezzo_pubblico }}"
-           data-name="{{ p.nome|lower }}">
-        <img src="{{ p.image_url or 'https://picsum.photos/seed/fish' ~ p.id ~ '/640/420' }}" alt="{{ p.nome }}" loading="lazy">
-        <div class="prod-title">{{ p.nome }}</div>
-        <div class="prod-sub">{{ p.descrizione or '' }}</div>
-        <div class="prod-sub">€ {{ '%.2f'|format(p.prezzo_pubblico) }} • Giacenza {{ p.giacenza }} {{ p.unita_misura }}</div>
-
-        <div class="card-controls">
-          <label>Confezione</label>
-          <select class="confezione-select">
-            {% for conf in p.confezioni %}
-            <option value="{{ conf.id }}" data-moltiplicatore="{{ conf.moltiplicatore }}">
-              {{ conf.nome }}{% if conf.moltiplicatore != 1 %} (x{{ conf.moltiplicatore }}){% endif %}
-            </option>
-            {% endfor %}
-          </select>
-
-          <div class="qty-stepper">
-            <button type="button" class="qty-minus">-</button>
-            <span class="qty-value">1</span>
-            <button type="button" class="qty-plus">+</button>
-          </div>
-        </div>
-
-        <button class="btn-add" {{ 'disabled' if not p.disponibile }}>Aggiungi</button>
-      </div>
-      {% endfor %}
+<div class="form-box">
+  <form method="post" class="form-grid">
+    <div>
+      <label>Nome</label>
+      <input name="nome" required>
     </div>
-  </aside>
-
-  <section class="cart">
-    <h3>Carrello ordine</h3>
-    <div id="cart-items"></div>
-
-    <div class="cart-summary">
-      <label>Cliente</label>
-      <select id="cliente">
-        <option value="">Senza cliente</option>
-        {% for c in clienti %}
-        <option value="{{ c.id }}">{{ c.nome }}</option>
-        {% endfor %}
-      </select>
-
-      <label>Note</label>
-      <textarea id="order-note" rows="3"></textarea>
-
-      <div class="total-line">Totale: € <span id="total">0.00</span></div>
-      <button id="place-order" class="btn-primary">Conferma ordine</button>
+    <div>
+      <label>Immagine URL</label>
+      <input name="image_url">
     </div>
-  </section>
+    <div>
+      <label>Costo</label>
+      <input name="costo" type="number" step="0.01">
+    </div>
+    <div>
+      <label>Prezzo pubblico</label>
+      <input name="prezzo_pubblico" type="number" step="0.01">
+    </div>
+    <div>
+      <label>Giacenza</label>
+      <input name="giacenza" type="number" step="0.01">
+    </div>
+    <div>
+      <label>Unità di misura</label>
+      <input name="unita_misura" placeholder="pz / kg / tranci">
+    </div>
+    <div style="grid-column: 1 / -1;">
+      <label>Descrizione</label>
+      <textarea name="descrizione" rows="3"></textarea>
+    </div>
+    <div style="grid-column: 1 / -1;">
+      <button class="btn-primary" type="submit">Salva prodotto</button>
+    </div>
+  </form>
 </div>
 
-<script>
-const cart = [];
-
-function renderCart() {
-  const wrap = document.getElementById('cart-items');
-  wrap.innerHTML = '';
-  let total = 0;
-
-  cart.forEach((it, i) => {
-    total += it.qty * it.prezzo;
-    const el = document.createElement('div');
-    el.className = 'cart-row';
-    el.innerHTML = `
-      <div>
-        <strong>${it.nome}</strong><br>
-        ${it.confezione_nome} — ${it.qty} x €${it.prezzo.toFixed(2)}
-      </div>
-      <div>
-        <button onclick="dec(${i})">-</button>
-        <button onclick="inc(${i})">+</button>
-        <button onclick="rm(${i})">x</button>
-      </div>
-    `;
-    wrap.appendChild(el);
-  });
-
-  document.getElementById('total').innerText = total.toFixed(2);
-}
-
-function dec(i) {
-  cart[i].qty = Math.max(0, cart[i].qty - 1);
-  if (cart[i].qty === 0) cart.splice(i, 1);
-  renderCart();
-}
-
-function inc(i) {
-  cart[i].qty += 1;
-  renderCart();
-}
-
-function rm(i) {
-  cart.splice(i, 1);
-  renderCart();
-}
-
-document.querySelectorAll('.prod-card').forEach(card => {
-  let qty = 1;
-  const qtyValue = card.querySelector('.qty-value');
-  const minus = card.querySelector('.qty-minus');
-  const plus = card.querySelector('.qty-plus');
-  const addBtn = card.querySelector('.btn-add');
-
-  minus.addEventListener('click', () => {
-    qty = Math.max(1, qty - 1);
-    qtyValue.textContent = qty;
-  });
-
-  plus.addEventListener('click', () => {
-    qty += 1;
-    qtyValue.textContent = qty;
-  });
-
-  addBtn.addEventListener('click', e => {
-    const id = parseInt(card.dataset.id);
-    const prezzo = parseFloat(card.dataset.prezzo);
-    const nome = card.querySelector('.prod-title').innerText;
-    const confSelect = card.querySelector('.confezione-select');
-    const confId = parseInt(confSelect.value);
-    const confNome = confSelect.options[confSelect.selectedIndex].text;
-    const key = `${id}-${confId}`;
-
-    const existing = cart.find(x => x.key === key);
-    if (existing) {
-      existing.qty += qty;
-    } else {
-      cart.push({
-        key,
-        prodotto_id: id,
-        confezione_id: confId,
-        confezione_nome: confNome,
-        nome,
-        qty,
-        prezzo
-      });
-    }
-
-    qty = 1;
-    qtyValue.textContent = qty;
-    renderCart();
-  });
-});
-
-document.getElementById('search').addEventListener('input', e => {
-  const q = e.target.value.toLowerCase();
-  document.querySelectorAll('.prod-card').forEach(card => {
-    card.style.display = card.dataset.name.includes(q) ? '' : 'none';
-  });
-});
-
-document.getElementById('place-order').addEventListener('click', async () => {
-  const cliente_id = document.getElementById('cliente').value || null;
-  const note = document.getElementById('order-note').value || '';
-
-  if (cart.length === 0) {
-    alert('Carrello vuoto');
-    return;
-  }
-
-  const body = {
-    cliente_id,
-    articoli: cart.map(c => ({
-      prodotto_id: c.prodotto_id,
-      confezione_id: c.confezione_id,
-      qty: c.qty,
-      prezzo_unit: c.prezzo
-    })),
-    note
-  };
-
-  const res = await fetch('/api/ordina', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify(body)
-  });
-
-  const j = await res.json();
-  if (j.ok) {
-    alert('Ordine creato: #' + j.ordine_id);
-    window.location.href = '/ordini/' + j.ordine_id;
-  } else {
-    alert(j.error || 'Errore ordine');
-  }
-});
-</script>
+<div class="table-card">
+  <table>
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>Prezzo</th>
+        <th>Giacenza</th>
+        <th>Disponibile</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in prodotti %}
+      <tr>
+        <td>{{ p.nome }}</td>
+        <td>€ {{ '%.2f'|format(p.prezzo_pubblico) }}</td>
+        <td>{{ p.giacenza }} {{ p.unita_misura }}</td>
+        <td>{{ 'Sì' if p.disponibile else 'No' }}</td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="4">Nessun prodotto presente</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 {% endblock %}

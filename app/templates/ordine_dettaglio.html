@@ -3,44 +3,36 @@
 <h2>Ordine #{{ ordine.id }}</h2>
 
 <div class="detail-card">
-  <div class="detail-grid">
-    <div><strong>Cliente</strong><br>{{ ordine.cliente.nome if ordine.cliente else '-' }}</div>
-    <div><strong>Stato</strong><br>{{ ordine.stato }}</div>
-    <div><strong>Data</strong><br>{{ ordine.data_ordine.strftime('%d/%m/%Y %H:%M') }}</div>
-    <div><strong>Totale</strong><br>€ {{ '%.2f'|format(ordine.totale) }}</div>
-  </div>
-
-  <p class="detail-note"><strong>Note:</strong> {{ ordine.note or '-' }}</p>
-
-  <div class="status-actions">
-    <a href="{{ url_for('main.set_stato', order_id=ordine.id, stato='nuovo') }}">Nuovo</a>
-    <a href="{{ url_for('main.set_stato', order_id=ordine.id, stato='in_preparazione') }}">In preparazione</a>
-    <a href="{{ url_for('main.set_stato', order_id=ordine.id, stato='evaso') }}">Evaso</a>
-  </div>
+  <p><strong>Cliente:</strong> {{ ordine.cliente.nome if ordine.cliente else 'Senza cliente' }}</p>
+  <p><strong>Stato:</strong> {{ ordine.stato }}</p>
+  <p><strong>Totale:</strong> € {{ '%.2f'|format(ordine.totale or 0) }}</p>
+  <p><strong>Note:</strong> {{ ordine.note or '-' }}</p>
 </div>
 
-<table>
-  <thead>
-    <tr>
-      <th>Prodotto</th>
-      <th>Confezione</th>
-      <th>Q.tà</th>
-      <th>Scarico magazzino</th>
-      <th>Prezzo</th>
-      <th>Subtotale</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for r in ordine.righe %}
-    <tr>
-      <td>{{ r.prodotto.nome }}</td>
-      <td>{{ r.confezione.nome if r.confezione else 'Base' }}</td>
-      <td>{{ r.quantita }}</td>
-      <td>{{ r.quantita_magazzino }}</td>
-      <td>€ {{ '%.2f'|format(r.prezzo_unitario) }}</td>
-      <td>€ {{ '%.2f'|format(r.quantita * r.prezzo_unitario) }}</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+<div class="table-card" style="margin-top: 18px;">
+  <table>
+    <thead>
+      <tr>
+        <th>Prodotto</th>
+        <th>Confezione</th>
+        <th>Quantità</th>
+        <th>Prezzo</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in ordine.righe %}
+      <tr>
+        <td>{{ r.prodotto.nome }}</td>
+        <td>{{ r.confezione.nome if r.confezione else '-' }}</td>
+        <td>{{ r.quantita }}</td>
+        <td>€ {{ '%.2f'|format(r.prezzo_unitario) }}</td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="4">Nessuna riga presente</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 {% endblock %}

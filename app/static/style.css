@@ -436,6 +436,27 @@ textarea {
   font-weight: 800;
 }
 
+.table-card {
+  overflow: hidden;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 14px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+}
+
+th {
+  font-size: 0.88rem;
+  color: var(--muted);
+  background: rgba(255,255,255,0.35);
+}
+
 .bottom-nav {
   display: none;
 }

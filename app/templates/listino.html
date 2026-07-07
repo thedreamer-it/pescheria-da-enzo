@@ -2,24 +2,30 @@
 {% block content %}
 <h2>Listino</h2>
 
-<table>
-  <thead>
-    <tr>
-      <th>Prodotto</th>
-      <th>Disponibile</th>
-      <th>Giacenza</th>
-      <th>Prezzo</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for prodotto in prodotti %}
-    <tr>
-      <td>{{ prodotto.nome }}</td>
-      <td>{{ 'Sì' if prodotto.disponibile else 'No' }}</td>
-      <td>{{ prodotto.giacenza }}</td>
-      <td>€ {{ '%.2f'|format(prodotto.prezzo_pubblico) }}</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+<div class="table-card">
+  <table>
+    <thead>
+      <tr>
+        <th>Prodotto</th>
+        <th>Descrizione</th>
+        <th>Prezzo pubblico</th>
+        <th>Giacenza</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in prodotti %}
+      <tr>
+        <td>{{ p.nome }}</td>
+        <td>{{ p.descrizione or '-' }}</td>
+        <td>€ {{ '%.2f'|format(p.prezzo_pubblico) }}</td>
+        <td>{{ p.giacenza }} {{ p.unita_misura }}</td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="4">Nessun prodotto presente</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 {% endblock %}
