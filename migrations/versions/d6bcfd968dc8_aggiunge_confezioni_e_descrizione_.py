@@ -15,10 +15,29 @@ depends_on = None
 
 
 def upgrade():
+    with op.batch_alter_table('prodotto', schema=None) as batch_op:
+        batch_op.add_column(sa.Column('descrizione', sa.Text(), nullable=True))
+
+    op.create_table(
+        'confezione',
+        sa.Column('id', sa.Integer(), nullable=False),
+        sa.Column('prodotto_id', sa.Integer(), nullable=False),
+        sa.Column('nome', sa.String(length=120), nullable=False),
+        sa.Column('moltiplicatore', sa.Float(), nullable=True),
+        sa.Column('prezzo_extra', sa.Float(), nullable=True),
+        sa.ForeignKeyConstraint(['prodotto_id'], ['prodotto.id']),
+        sa.PrimaryKeyConstraint('id')
+    )
+
     with op.batch_alter_table('riga_ordine', schema=None) as batch_op:
         batch_op.add_column(sa.Column('confezione_id', sa.Integer(), nullable=True))
         batch_op.add_column(sa.Column('quantita_magazzino', sa.Float(), nullable=True))
-        batch_op.create_foreign_key('fk_riga_ordine_confezione_id', 'confezione', ['confezione_id'], ['id'])
+        batch_op.create_foreign_key(
+            'fk_riga_ordine_confezione_id',
+            'confezione',
+            ['confezione_id'],
+            ['id']
+        )
 
 
 def downgrade():
@@ -26,3 +45,8 @@ def downgrade():
         batch_op.drop_constraint('fk_riga_ordine_confezione_id', type_='foreignkey')
         batch_op.drop_column('quantita_magazzino')
         batch_op.drop_column('confezione_id')
+
+    op.drop_table('confezione')
+
+    with op.batch_alter_table('prodotto', schema=None) as batch_op:
+        batch_op.drop_column('descrizione')
