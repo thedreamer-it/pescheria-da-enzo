@@ -1,74 +1,59 @@
 {% extends "base.html" %}
-{% block title %}Dashboard - Pescheria da Enzo{% endblock %}
-{% block header_title %}Dashboard{% endblock %}
 {% block content %}
+<h2>Dashboard</h2>
 
-<div class="page-top">
-  <div>
-    <h2 class="page-title">Panoramica attività</h2>
-    <p class="page-subtitle">Uno sguardo rapido su clienti, prodotti, ordini e attività da gestire.</p>
-  </div>
-</div>
-
-<div class="stats-grid">
-  <div class="stat-card premium-card">
+<div class="dash-grid">
+  <div class="stat-card">
     <div class="stat-title">Clienti</div>
     <div class="stat-value">{{ clienti }}</div>
-    <div class="stat-note">Anagrafiche attive</div>
   </div>
 
-  <div class="stat-card premium-card">
+  <div class="stat-card">
     <div class="stat-title">Prodotti</div>
     <div class="stat-value">{{ prodotti }}</div>
-    <div class="stat-note">Articoli a catalogo</div>
   </div>
 
-  <div class="stat-card premium-card">
+  <div class="stat-card">
     <div class="stat-title">Ordini</div>
     <div class="stat-value">{{ ordini }}</div>
-    <div class="stat-note">Totale ordini registrati</div>
   </div>
 
-  <div class="stat-card premium-card accent-card">
+  <div class="stat-card">
     <div class="stat-title">Da preparare</div>
     <div class="stat-value">{{ to_prepare }}</div>
-    <div class="stat-note">Ordini in lavorazione</div>
   </div>
 </div>
 
-<section class="surface-card">
-  <div class="panel-head">
-    <div>
-      <div class="section-kicker">Monitoraggio</div>
-      <h3>Ultimi ordini</h3>
-    </div>
-  </div>
+<section class="recent-section">
+  <h3>Totale ordini</h3>
+  <p style="font-size: 24px; font-weight: 700; margin: 8px 0 0;">€ {{ '%.2f'|format(totale_ordini) }}</p>
+</section>
 
-  <div class="table-shell">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Cliente</th>
-          <th>Totale</th>
-          <th>Stato</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for o in recenti %}
-        <tr>
-          <td data-label="ID">#{{ o.id }}</td>
-          <td data-label="Cliente">{{ o.cliente.nome if o.cliente else '-' }}</td>
-          <td data-label="Totale">€ {{ '%.2f'|format(o.totale) }}</td>
-          <td data-label="Stato"><span class="status-pill">{{ o.stato }}</span></td>
-        </tr>
-        {% else %}
-        <tr>
-          <td colspan="4">Nessun ordine recente.</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
+<section class="recent-section">
+  <h3>Ultimi ordini</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Cliente</th>
+        <th>Totale</th>
+        <th>Stato</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for o in recenti %}
+      <tr>
+        <td>#{{ o.id }}</td>
+        <td>{{ o.cliente.nome if o.cliente else '-' }}</td>
+        <td>€ {{ '%.2f'|format(o.totale) }}</td>
+        <td>{{ o.stato }}</td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="4">Nessun ordine recente.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </section>
 {% endblock %}

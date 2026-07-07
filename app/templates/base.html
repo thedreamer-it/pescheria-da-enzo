@@ -3,34 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Pescheria da Enzo{% endblock %}</title>
+    <title>Pescheria da Enzo</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
   <div class="app-shell">
     <aside class="sidebar">
-      <div class="brand-block">
-        <span class="brand-kicker">Gestione negozio</span>
-        <h1>Pescheria da Enzo</h1>
-        <p>Ordini, clienti e magazzino in un solo pannello.</p>
-      </div>
-
-      <nav class="sidebar-nav">
-        <a href="{{ url_for('main.dashboard') }}" class="{% if request.endpoint == 'main.dashboard' %}active{% endif %}">Dashboard</a>
-        <a href="{{ url_for('main.nuovo_ordine') }}" class="{% if request.endpoint == 'main.nuovo_ordine' %}active{% endif %}">Nuovo ordine</a>
-        <a href="{{ url_for('main.prodotti') }}" class="{% if request.endpoint == 'main.prodotti' %}active{% endif %}">Magazzino</a>
-        <a href="{{ url_for('main.clienti') }}" class="{% if request.endpoint == 'main.clienti' %}active{% endif %}">Clienti</a>
-        <a href="{{ url_for('main.ordini') }}" class="{% if request.endpoint == 'main.ordini' %}active{% endif %}">Ordini</a>
+      <h1>Pescheria</h1>
+      <nav>
+        <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('main.nuovo_ordine') }}">Nuovo ordine</a>
+        <a href="{{ url_for('main.prodotti') }}">Magazzino</a>
+        <a href="{{ url_for('main.clienti') }}">Clienti</a>
+        <a href="{{ url_for('main.ordini') }}">Ordini</a>
       </nav>
     </aside>
 
     <main class="main-area">
       <header class="main-header">
-        <div>
-          <div class="page-eyebrow">Pescheria da Enzo</div>
-          <div class="header-title">{% block header_title %}Pannello operativo{% endblock %}</div>
-        </div>
-        <div class="header-badge">Online</div>
+        <div class="logo">Pescheria da Enzo</div>
       </header>
 
       <section class="page">
@@ -38,12 +29,5 @@
       </section>
     </main>
   </div>
-
-  <nav class="mobile-bottom-nav">
-    <a href="{{ url_for('main.dashboard') }}" class="{% if request.endpoint == 'main.dashboard' %}active{% endif %}">Home</a>
-    <a href="{{ url_for('main.nuovo_ordine') }}" class="{% if request.endpoint == 'main.nuovo_ordine' %}active{% endif %}">Ordine</a>
-    <a href="{{ url_for('main.prodotti') }}" class="{% if request.endpoint == 'main.prodotti' %}active{% endif %}">Magazzino</a>
-    <a href="{{ url_for('main.ordini') }}" class="{% if request.endpoint == 'main.ordini' %}active{% endif %}">Ordini</a>
-  </nav>
 </body>
 </html>

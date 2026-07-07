@@ -1,48 +1,48 @@
 {% extends "base.html" %}
-{% block title %}Clienti - Pescheria da Enzo{% endblock %}
-{% block header_title %}Clienti{% endblock %}
 {% block content %}
+<h2>Clienti</h2>
 
-<div class="page-top">
-  <div>
-    <h2 class="page-title">Clienti</h2>
-    <p class="page-subtitle">Anagrafiche clienti organizzate in modo più leggibile, pulito e ordinato.</p>
-  </div>
-</div>
+<form method="POST" class="form-box">
+    <div class="form-grid">
+        <div>
+            <label for="nome">Nome</label>
+            <input type="text" id="nome" name="nome" required>
+        </div>
 
-<section class="surface-card">
-  <div class="panel-head">
-    <div>
-      <div class="section-kicker">Rubrica</div>
-      <h3>Elenco clienti</h3>
+        <div>
+            <label for="telefono">Telefono</label>
+            <input type="text" id="telefono" name="telefono">
+        </div>
+
+        <div style="grid-column: 1 / -1;">
+            <label for="note">Note</label>
+            <textarea id="note" name="note" rows="4"></textarea>
+        </div>
     </div>
-  </div>
 
-  <div class="table-shell">
-    <table class="data-table">
-      <thead>
+    <button type="submit" class="btn-primary">Aggiungi cliente</button>
+</form>
+
+<table>
+    <thead>
         <tr>
-          <th>Nome</th>
-          <th>Telefono</th>
-          <th>Email</th>
-          <th>Indirizzo</th>
+            <th>Nome</th>
+            <th>Telefono</th>
+            <th>Note</th>
         </tr>
-      </thead>
-      <tbody>
+    </thead>
+    <tbody>
         {% for cliente in clienti %}
         <tr>
-          <td data-label="Nome">{{ cliente.nome }}</td>
-          <td data-label="Telefono">{{ cliente.telefono if cliente.telefono else '-' }}</td>
-          <td data-label="Email">{{ cliente.email if cliente.email else '-' }}</td>
-          <td data-label="Indirizzo">{{ cliente.indirizzo if cliente.indirizzo else '-' }}</td>
+            <td>{{ cliente.nome }}</td>
+            <td>{{ cliente.telefono or '-' }}</td>
+            <td>{{ cliente.note or '-' }}</td>
         </tr>
         {% else %}
         <tr>
-          <td colspan="4">Nessun cliente presente.</td>
+            <td colspan="3">Nessun cliente presente.</td>
         </tr>
         {% endfor %}
-      </tbody>
-    </table>
-  </div>
-</section>
+    </tbody>
+</table>
 {% endblock %}
