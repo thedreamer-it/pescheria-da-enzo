@@ -177,49 +177,95 @@ def clienti():
 
 @main.route("/prodotti", methods=["GET", "POST"])
 def prodotti():
-    seed_demo_data()
+    def seed_demo_data():
+        demo = [
+            {
+                "nome": "Orata",
+                "image_url": "https://images.unsplash.com/photo-1510130387422-82bed34b37e9?auto=format&fit=crop&w=900&q=80",
+                "costo": 8.50,
+                "prezzo_pubblico": 14.90,
+                "giacenza": 48,
+                "unita_misura": "pz",
+                "descrizione": "Orata fresca da banco"
+            },
+            {
+                "nome": "Spigola",
+                "image_url": "https://images.unsplash.com/photo-1579631542720-3a87824fff86?auto=format&fit=crop&w=900&q=80",
+                "costo": 9.20,
+                "prezzo_pubblico": 16.50,
+                "giacenza": 36,
+                "unita_misura": "pz",
+                "descrizione": "Spigola fresca ideale al forno"
+            },
+            {
+                "nome": "Gamberi Rossi",
+                "image_url": "https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?auto=format&fit=crop&w=900&q=80",
+                "costo": 18.00,
+                "prezzo_pubblico": 28.00,
+                "giacenza": 20,
+                "unita_misura": "kg",
+                "descrizione": "Gamberi rossi selezionati"
+            },
+            {
+                "nome": "Calamari",
+                "image_url": "https://images.unsplash.com/photo-1603048719539-9ecb6fdfaf20?auto=format&fit=crop&w=900&q=80",
+                "costo": 10.50,
+                "prezzo_pubblico": 18.50,
+                "giacenza": 15,
+                "unita_misura": "kg",
+                "descrizione": "Calamari freschi"
+            },
+            {
+                "nome": "Salmone",
+                "image_url": "https://images.unsplash.com/photo-1599084993091-1cb5c0721cc6?auto=format&fit=crop&w=900&q=80",
+                "costo": 13.00,
+                "prezzo_pubblico": 22.00,
+                "giacenza": 24,
+                "unita_misura": "tranci",
+                "descrizione": "Tranci di salmone"
+            },
+        ]
 
-    if request.method == "POST":
-        azione = request.form.get("azione")
+        for item in demo:
+            prodotto = Prodotto.query.filter_by(nome=item["nome"]).first()
 
-        if azione == "carico":
-            prodotto_id = request.form.get("prodotto_id")
-            quantita_carico = float(request.form.get("quantita_carico") or 0)
-            prodotto = Prodotto.query.get(int(prodotto_id))
-            if prodotto:
-                prodotto.giacenza = (prodotto.giacenza or 0) + quantita_carico
-                prodotto.disponibile = prodotto.giacenza > 0
-                db.session.commit()
-            return redirect(url_for("main.prodotti"))
+            if not prodotto:
+                prodotto = Prodotto(
+                    nome=item["nome"],
+                    image_url=item["image_url"],
+                    costo=item["costo"],
+                    prezzo_pubblico=item["prezzo_pubblico"],
+                    giacenza=item["giacenza"],
+                    disponibile=item["giacenza"] > 0,
+                    unita_misura=item["unita_misura"],
+                    descrizione=item["descrizione"],
+                )
+                db.session.add(prodotto)
+                db.session.flush()
 
-        p = Prodotto(
-            nome=request.form.get("nome"),
-            image_url=request.form.get("image_url"),
-            costo=float(request.form.get("costo") or 0),
-            prezzo_pubblico=float(request.form.get("prezzo_pubblico") or 0),
-            giacenza=float(request.form.get("giacenza") or 0),
-            disponibile=bool(request.form.get("disponibile")),
-            unita_misura=request.form.get("unita_misura") or "pz",
-            descrizione=request.form.get("descrizione"),
-        )
-        db.session.add(p)
-        db.session.flush()
+            confezioni_esistenti = {
+                c.nome for c in Confezione.query.filter_by(prodotto_id=prodotto.id).all()
+            }
 
-        db.session.add(Confezione(prodotto_id=p.id, nome="Base", moltiplicatore=1, prezzo_extra=0))
+            confezioni_demo = [
+                ("Base", 1),
+                ("Confezione x2", 2),
+                ("Confezione x5", 5),
+            ]
 
-        nome_conf = request.form.getlist("conf_nome[]")
-        mult_conf = request.form.getlist("conf_moltiplicatore[]")
-
-        for nome, mol in zip(nome_conf, mult_conf):
-            if nome and mol:
-                db.session.add(Confezione(
-                    prodotto_id=p.id,
-                    nome=nome,
-                    moltiplicatore=float(mol),
-                    prezzo_extra=0
-                ))
+            for nome_conf, moltiplicatore in confezioni_demo:
+                if nome_conf not in confezioni_esistenti:
+                    db.session.add(
+                        Confezione(
+                            prodotto_id=prodotto.id,
+                            nome=nome_conf,
+                            moltiplicatore=moltiplicatore,
+                            prezzo_extra=0,
+                        )
+                    )
 
         db.session.commit()
+
         return redirect(url_for("main.prodotti"))
 
     items = Prodotto.query.order_by(Prodotto.nome.asc()).all()
