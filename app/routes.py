@@ -1,6 +1,9 @@
-from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash
+from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash, Response
 from . import db
 from .models import Cliente, Prodotto, Confezione, Ordine, RigaOrdine
+from datetime import date, datetime
+import csv
+import io
 
 main = Blueprint("main", __name__)
 
@@ -112,6 +115,39 @@ def ricalcola_totale_ordine(ordine):
         ordine.stato = "in_preparazione"
 
 
+def report_rows_for_date(target_date):
+    ordini = Ordine.query.filter(Ordine.data_consegna == target_date).all()
+    aggregati = {}
+
+    for ordine in ordini:
+        for riga in ordine.righe:
+            key = (
+                riga.prodotto_id,
+                riga.prodotto.nome,
+                riga.prodotto.unita_misura or "",
+            )
+            item = aggregati.setdefault(
+                key,
+                {
+                    "prodotto_id": riga.prodotto_id,
+                    "nome": riga.prodotto.nome,
+                    "unita_misura": riga.prodotto.unita_misura or "",
+                    "ordinato": 0.0,
+                    "evaso": 0.0,
+                    "da_preparare": 0.0,
+                },
+            )
+            qty = float(riga.quantita_magazzino or 0)
+            item["ordinato"] += qty
+
+            if riga.evaso:
+                item["evaso"] += qty
+            else:
+                item["da_preparare"] += qty
+
+    return list(aggregati.values())
+
+
 @main.route("/")
 def dashboard():
     seed_demo_data()
@@ -143,6 +179,61 @@ def nuovo_ordine():
 def ordini():
     lista = Ordine.query.order_by(Ordine.data_ordine.desc()).all()
     return render_template("ordini.html", ordini=lista)
+
+
+@main.route("/report")
+def report():
+    seed_demo_data()
+    target_str = request.args.get("data") or date.today().isoformat()
+
+    try:
+        target_date = datetime.strptime(target_str, "%Y-%m-%d").date()
+    except ValueError:
+        target_date = date.today()
+        target_str = target_date.isoformat()
+
+    rows = report_rows_for_date(target_date)
+
+    return render_template(
+        "report.html",
+        report_date=target_date,
+        report_date_str=target_str,
+        rows=rows,
+    )
+
+
+@main.route("/report/export.csv")
+def export_report_csv():
+    target_str = request.args.get("data") or date.today().isoformat()
+
+    try:
+        target_date = datetime.strptime(target_str, "%Y-%m-%d").date()
+    except ValueError:
+        target_date = date.today()
+
+    rows = report_rows_for_date(target_date)
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["Data consegna", "Prodotto", "Unità", "Ordinato", "Evase", "Da preparare"])
+
+    for row in rows:
+        writer.writerow([
+            target_date.isoformat(),
+            row["nome"],
+            row["unita_misura"],
+            row["ordinato"],
+            row["evaso"],
+            row["da_preparare"],
+        ])
+
+    return Response(
+        output.getvalue(),
+        mimetype="text/csv",
+        headers={
+            "Content-Disposition": f"attachment; filename=report_{target_date.isoformat()}.csv"
+        },
+    )
 
 
 @main.route("/ordini/<int:ordine_id>", methods=["GET", "POST"])
@@ -199,7 +290,7 @@ def ordine_dettaglio(ordine_id):
             if confezione_id:
                 confezione = Confezione.query.filter_by(
                     id=confezione_id,
-                    prodotto_id=prodotto.id,
+                    prodotto_id=prodotto.id
                 ).first()
 
             moltiplicatore = confezione.moltiplicatore if confezione else 1
@@ -240,10 +331,8 @@ def ordine_dettaglio(ordine_id):
         if action == "delete_riga":
             riga_id = request.form.get("riga_id", type=int)
             riga = RigaOrdine.query.filter_by(id=riga_id, ordine_id=ordine.id).first_or_404()
-
             db.session.delete(riga)
             db.session.flush()
-
             ricalcola_totale_ordine(ordine)
             db.session.commit()
             flash("Riga eliminata dall'ordine.", "success")
@@ -252,10 +341,25 @@ def ordine_dettaglio(ordine_id):
     prodotti = Prodotto.query.order_by(Prodotto.nome.asc()).all()
     return render_template("ordine_dettaglio.html", ordine=ordine, prodotti=prodotti)
 
+@main.route("/ordini/<int:ordine_id>/elimina", methods=["POST"])
+def elimina_ordine(ordine_id):
+    ordine = Ordine.query.get_or_404(ordine_id)
+    db.session.delete(ordine)
+    db.session.commit()
+    flash(f"Ordine #{ordine_id} eliminato.", "success")
+    return redirect(url_for("main.ordini"))
+
 
 @main.route("/prodotti", methods=["GET", "POST"])
 def prodotti():
     seed_demo_data()
+    filtro = request.args.get("filtro", "tutti")
+    prodotti_query = Prodotto.query.order_by(Prodotto.nome.asc())
+
+    if filtro == "disponibili":
+        prodotti_query = prodotti_query.filter(Prodotto.disponibile.is_(True))
+    elif filtro == "non_disponibili":
+        prodotti_query = prodotti_query.filter(Prodotto.disponibile.is_(False))
 
     if request.method == "POST":
         nome = request.form.get("nome", "").strip()
@@ -279,10 +383,25 @@ def prodotti():
         else:
             flash("Inserisci il nome del prodotto.", "warning")
 
+        return redirect(url_for("main.prodotti", filtro=filtro))
+
+    prodotti_lista = prodotti_query.all()
+    return render_template("prodotti.html", prodotti=prodotti_lista, filtro=filtro)
+
+
+@main.route("/prodotti/<int:prodotto_id>/elimina", methods=["POST"])
+def elimina_prodotto(prodotto_id):
+    prodotto = Prodotto.query.get_or_404(prodotto_id)
+    usato = RigaOrdine.query.filter_by(prodotto_id=prodotto.id).first() is not None
+
+    if usato:
+        flash("Impossibile eliminare il prodotto perché è già presente in alcuni ordini.", "warning")
         return redirect(url_for("main.prodotti"))
 
-    prodotti_lista = Prodotto.query.order_by(Prodotto.nome.asc()).all()
-    return render_template("prodotti.html", prodotti=prodotti_lista)
+    db.session.delete(prodotto)
+    db.session.commit()
+    flash("Prodotto eliminato correttamente.", "success")
+    return redirect(url_for("main.prodotti"))
 
 
 @main.route("/prodotti/<int:prodotto_id>/modifica", methods=["GET", "POST"])
@@ -345,14 +464,24 @@ def listino():
 def api_ordina():
     data = request.get_json(force=True)
     cliente_id = data.get("cliente_id")
+    data_consegna_str = data.get("data_consegna")
     articoli = data.get("articoli", [])
     note = data.get("note", "")
 
     if not articoli:
         return jsonify({"ok": False, "error": "Carrello vuoto"}), 400
 
+    if not data_consegna_str:
+        return jsonify({"ok": False, "error": "Data consegna obbligatoria"}), 400
+
+    try:
+        data_consegna = datetime.strptime(data_consegna_str, "%Y-%m-%d").date()
+    except ValueError:
+        return jsonify({"ok": False, "error": "Formato data consegna non valido"}), 400
+
     ordine = Ordine(
         cliente_id=cliente_id or None,
+        data_consegna=data_consegna,
         stato="nuovo",
         consegnato=False,
         totale=0.0,

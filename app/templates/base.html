@@ -11,7 +11,6 @@
   {% set endpoint = request.endpoint or '' %}
 
   <div class="app-shell">
-    <!-- Sidebar desktop -->
     <aside class="sidebar">
       <div class="sidebar-brand">
         <h1>Pescheria</h1>
@@ -27,16 +26,20 @@
           Nuovo ordine
         </a>
 
-        <a href="{{ url_for('main.prodotti') }}" class="{% if endpoint == 'main.prodotti' or endpoint == 'main.modifica_prodotto' %}active{% endif %}">
+        <a href="{{ url_for('main.prodotti') }}" class="{% if endpoint in ['main.prodotti', 'main.modifica_prodotto'] %}active{% endif %}">
           Magazzino
+        </a>
+
+        <a href="{{ url_for('main.ordini') }}" class="{% if endpoint in ['main.ordini', 'main.ordine_dettaglio'] %}active{% endif %}">
+          Ordini
+        </a>
+
+        <a href="{{ url_for('main.report') }}" class="{% if endpoint == 'main.report' %}active{% endif %}">
+          Report
         </a>
 
         <a href="{{ url_for('main.clienti') }}" class="{% if endpoint == 'main.clienti' %}active{% endif %}">
           Clienti
-        </a>
-
-        <a href="{{ url_for('main.ordini') }}" class="{% if endpoint == 'main.ordini' or endpoint == 'main.ordine_dettaglio' %}active{% endif %}">
-          Ordini
         </a>
       </nav>
     </aside>
@@ -65,22 +68,21 @@
     </main>
   </div>
 
-  <!-- Navigazione mobile -->
   <nav class="mobile-bottom-nav" aria-label="Navigazione principale mobile">
     <a href="{{ url_for('main.dashboard') }}" class="{% if endpoint == 'main.dashboard' %}active{% endif %}">
       Home
     </a>
 
-    <a href="{{ url_for('main.ordini') }}" class="{% if endpoint == 'main.ordini' or endpoint == 'main.ordine_dettaglio' or endpoint == 'main.nuovo_ordine' %}active{% endif %}">
+    <a href="{{ url_for('main.ordini') }}" class="{% if endpoint in ['main.ordini', 'main.ordine_dettaglio', 'main.nuovo_ordine'] %}active{% endif %}">
       Ordini
     </a>
 
-    <a href="{{ url_for('main.prodotti') }}" class="{% if endpoint == 'main.prodotti' or endpoint == 'main.modifica_prodotto' %}active{% endif %}">
+    <a href="{{ url_for('main.prodotti') }}" class="{% if endpoint in ['main.prodotti', 'main.modifica_prodotto'] %}active{% endif %}">
       Magazzino
     </a>
 
-    <a href="{{ url_for('main.clienti') }}" class="{% if endpoint == 'main.clienti' %}active{% endif %}">
-      Clienti
+    <a href="{{ url_for('main.report') }}" class="{% if endpoint == 'main.report' %}active{% endif %}">
+      Report
     </a>
   </nav>
 </body>

@@ -1,8 +1,18 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>Listino</h2>
+<div class="page-head">
+  <div>
+    <p class="eyebrow">Consultazione</p>
+    <h2 class="page-title">Listino</h2>
+    <p class="page-subtitle">Visualizza disponibilità, prezzi pubblici e descrizioni dei prodotti attivi.</p>
+  </div>
+</div>
 
-<div class="table-card">
+<div class="card table-card">
+  <div class="section-head">
+    <h3>Prodotti disponibili</h3>
+  </div>
+
   <table>
     <thead>
       <tr>
@@ -17,12 +27,12 @@
       <tr>
         <td>{{ p.nome }}</td>
         <td>{{ p.descrizione or '-' }}</td>
-        <td>€ {{ '%.2f'|format(p.prezzo_pubblico) }}</td>
-        <td>{{ p.giacenza }} {{ p.unita_misura }}</td>
+        <td>€ {{ '%.2f'|format(p.prezzo_pubblico|default(0, true)) }}</td>
+        <td>{{ p.giacenza|default(0, true) }} {{ p.unita_misura or 'kg' }}</td>
       </tr>
       {% else %}
       <tr>
-        <td colspan="4">Nessun prodotto presente</td>
+        <td colspan="4">Nessun prodotto presente.</td>
       </tr>
       {% endfor %}
     </tbody>

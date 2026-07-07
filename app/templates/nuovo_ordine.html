@@ -1,50 +1,91 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>Nuovo ordine</h2>
+<div class="page-head">
+  <div>
+    <p class="eyebrow">Ordini</p>
+    <h2 class="page-title">Nuovo ordine</h2>
+    <p class="page-subtitle">Crea un ordine scegliendo i prodotti dal listino attuale.</p>
+  </div>
+</div>
 
 <div class="order-wrap">
-  <aside class="prod-list">
+  <aside class="prod-list card">
+    <div class="section-head">
+      <h3>Listino prodotti</h3>
+    </div>
+
     <input id="search" placeholder="Cerca prodotto..." class="search" />
 
     <div class="prod-grid" id="prod-grid">
       {% for p in prodotti %}
-      <div class="prod-card" data-id="{{ p.id }}" data-prezzo="{{ p.prezzo|default(0, true) }}">
-        <div class="prod-title">{{ p.nome }}</div>
-        <div class="prod-sub">
-          € {{ '%.2f'|format(p.prezzo|default(0, true)) }} • {{ p.giacenza|default(0, true) }} {{ p.unita_misura or 'kg' }}
+      <div
+        class="prod-card"
+        data-id="{{ p.id }}"
+        data-prezzo="{{ p.prezzo_pubblico|default(0, true) }}"
+        data-giacenza="{{ p.giacenza|default(0, true) }}"
+        data-unita="{{ p.unita_misura or 'kg' }}"
+      >
+        <div>
+          <div class="prod-title">{{ p.nome }}</div>
+          <div class="prod-sub">
+            € {{ '%.2f'|format(p.prezzo_pubblico|default(0, true)) }}
+            • {{ p.giacenza|default(0, true) }} {{ p.unita_misura or 'kg' }}
+          </div>
         </div>
+
         <button type="button" class="btn-add">Aggiungi</button>
       </div>
       {% endfor %}
     </div>
   </aside>
 
-  <section class="cart">
-    <h3>Carrello</h3>
+  <section class="cart card">
+    <div class="section-head cart-head">
+      <div>
+        <h3>Carrello</h3>
+        <p class="cart-subtitle">Controlla quantità, cliente, consegna e note prima della conferma.</p>
+      </div>
+    </div>
 
-    <div id="cart-items"></div>
+    <div id="cart-items" class="cart-items"></div>
 
     <div class="cart-summary">
-      <label for="cliente">Cliente</label>
-      <select id="cliente">
-        <option value="">Senza cliente</option>
-        {% for c in clienti %}
-        <option value="{{ c.id }}">{{ c.nome }}</option>
-        {% endfor %}
-      </select>
+      <div class="form-row">
+        <label for="cliente">Cliente</label>
+        <select id="cliente">
+          <option value="">Senza cliente</option>
+          {% for c in clienti %}
+          <option value="{{ c.id }}">{{ c.nome }}</option>
+          {% endfor %}
+        </select>
+      </div>
 
-      <label for="order-note">Note</label>
-      <textarea id="order-note" rows="3"></textarea>
+      <div class="form-row">
+        <label for="data-consegna">Data consegna</label>
+        <input id="data-consegna" type="date">
+      </div>
 
-      <div class="total-line">Totale: € <span id="total">0.00</span></div>
+      <div class="form-row">
+        <label for="order-note">Note</label>
+        <textarea id="order-note" rows="3" placeholder="Eventuali note sull’ordine"></textarea>
+      </div>
 
-      <button id="place-order" class="btn-primary" type="button">Conferma ordine</button>
+      <div class="cart-total-box">
+        <span>Totale ordine</span>
+        <strong>€ <span id="total">0.00</span></strong>
+      </div>
+
+      <button id="place-order" class="btn-primary btn-full" type="button">Conferma ordine</button>
     </div>
   </section>
 </div>
 
 <script>
 const cart = [];
+
+function money(v) {
+  return Number(v || 0).toFixed(2);
+}
 
 function renderCart() {
   const wrap = document.getElementById('cart-items');
@@ -53,22 +94,41 @@ function renderCart() {
   let total = 0;
 
   if (cart.length === 0) {
-    wrap.innerHTML = '<div class="cart-row"><div>Carrello vuoto</div></div>';
+    wrap.innerHTML = `
+      <div class="empty-cart">
+        <div class="empty-cart-title">Carrello vuoto</div>
+        <div class="empty-cart-text">Aggiungi almeno un prodotto dal listino per creare un ordine.</div>
+      </div>
+    `;
     document.getElementById('total').innerText = '0.00';
     return;
   }
 
   cart.forEach((it, i) => {
-    total += it.qty * it.prezzo;
+    const rowTotal = it.qty * it.prezzo;
+    total += rowTotal;
 
     const el = document.createElement('div');
-    el.className = 'cart-row';
+    el.className = 'cart-item';
     el.innerHTML = `
-      <div>${it.nome} — ${it.qty} x €${it.prezzo.toFixed(2)}</div>
-      <div>
-        <button type="button" onclick="dec(${i})">−</button>
-        <button type="button" onclick="inc(${i})">+</button>
-        <button type="button" onclick="rm(${i})">x</button>
+      <div class="cart-item-top">
+        <div>
+          <div class="cart-item-title">${it.nome}</div>
+          <div class="cart-item-meta">
+            € ${money(it.prezzo)} cad. • ${it.giacenza} ${it.unita} disponibili
+          </div>
+        </div>
+        <button type="button" class="remove-item" onclick="rm(${i})">Rimuovi</button>
+      </div>
+
+      <div class="cart-item-bottom">
+        <div class="qty-control">
+          <button type="button" onclick="dec(${i})">−</button>
+          <span>${it.qty}</span>
+          <button type="button" onclick="inc(${i})">+</button>
+        </div>
+
+        <div class="cart-line-total">€ ${money(rowTotal)}</div>
       </div>
     `;
     wrap.appendChild(el);
@@ -86,7 +146,7 @@ function dec(i) {
 }
 
 function inc(i) {
-  cart[i].qty = cart[i].qty + 1;
+  cart[i].qty += 1;
   renderCart();
 }
 
@@ -101,6 +161,8 @@ document.querySelectorAll('.btn-add').forEach(btn => {
     const id = parseInt(card.dataset.id, 10);
     const prezzo = parseFloat(card.dataset.prezzo || '0');
     const nome = card.querySelector('.prod-title').innerText;
+    const giacenza = parseFloat(card.dataset.giacenza || '0');
+    const unita = card.dataset.unita || 'kg';
 
     const existing = cart.find(x => x.prodotto_id === id);
     if (existing) {
@@ -110,7 +172,9 @@ document.querySelectorAll('.btn-add').forEach(btn => {
         prodotto_id: id,
         nome,
         qty: 1,
-        prezzo
+        prezzo,
+        giacenza,
+        unita
       });
     }
 
@@ -128,6 +192,7 @@ document.getElementById('search').addEventListener('input', function () {
 
 document.getElementById('place-order').addEventListener('click', async () => {
   const cliente_id = document.getElementById('cliente').value || null;
+  const data_consegna = document.getElementById('data-consegna').value || '';
   const note = document.getElementById('order-note').value || '';
 
   if (cart.length === 0) {
@@ -135,8 +200,14 @@ document.getElementById('place-order').addEventListener('click', async () => {
     return;
   }
 
+  if (!data_consegna) {
+    alert('Seleziona la data di consegna');
+    return;
+  }
+
   const body = {
     cliente_id,
+    data_consegna,
     articoli: cart.map(c => ({
       prodotto_id: c.prodotto_id,
       qty: c.qty,
@@ -145,21 +216,27 @@ document.getElementById('place-order').addEventListener('click', async () => {
     note
   };
 
-  const res = await fetch('/api/ordina', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  });
+  try {
+    const res = await fetch('/api/ordina', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
 
-  const j = await res.json();
+    const j = await res.json();
 
-  if (j.ok) {
-    alert('Ordine creato: #' + j.ordine_id);
-    window.location.href = '/ordini';
-  } else {
-    alert('Errore ordine');
+    if (j.ok) {
+      alert('Ordine creato: #' + j.ordine_id);
+      window.location.href = '/ordini';
+    } else {
+      alert(j.error || 'Errore durante la creazione ordine');
+    }
+  } catch (err) {
+    alert('Errore di rete durante il salvataggio ordine');
   }
 });
+
+document.getElementById('data-consegna').valueAsDate = new Date();
 
 renderCart();
 </script>

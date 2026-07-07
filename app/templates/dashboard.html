@@ -1,39 +1,98 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>Ordini</h2>
+<div class="page-head">
+  <div>
+    <p class="eyebrow">Panoramica</p>
+    <h2 class="page-title">Dashboard</h2>
+    <p class="page-subtitle">Controllo rapido di ordini, clienti e magazzino.</p>
+  </div>
+</div>
 
-<table>
+<div class="dash-grid">
+  <div class="card stat-card">
+    <div class="stat-label">Clienti</div>
+    <div class="stat-value">{{ clienti }}</div>
+  </div>
+
+  <div class="card stat-card">
+    <div class="stat-label">Prodotti</div>
+    <div class="stat-value">{{ prodotti }}</div>
+  </div>
+
+  <div class="card stat-card">
+    <div class="stat-label">Ordini totali</div>
+    <div class="stat-value">{{ ordini }}</div>
+  </div>
+
+  <div class="card stat-card">
+    <div class="stat-label">Da preparare</div>
+    <div class="stat-value">{{ da_preparare }}</div>
+  </div>
+</div>
+
+<div class="card" style="margin-bottom: 18px;">
+  <div class="section-head">
+    <h3>Ordini recenti</h3>
+  </div>
+
+  <table>
     <thead>
-        <tr>
-            <th>ID</th>
-            <th>Cliente</th>
-            <th>Data</th>
-            <th>Stato</th>
-            <th>Totale</th>
-            <th>Note</th>
-            <th>Azioni</th>
-        </tr>
+      <tr>
+        <th>ID</th>
+        <th>Cliente</th>
+        <th>Data</th>
+        <th>Stato</th>
+        <th>Totale</th>
+        <th>Dettaglio</th>
+      </tr>
     </thead>
     <tbody>
-        {% for ordine in ordini %}
-        <tr>
-            <td>#{{ ordine.id }}</td>
-            <td>{{ ordine.cliente.nome if ordine.cliente else '-' }}</td>
-            <td>{{ ordine.data_ordine.strftime('%d/%m/%Y %H:%M') }}</td>
-            <td>{{ ordine.stato or '-' }}</td>
-            <td>€ {{ '%.2f'|format(ordine.totale|default(0, true)) }}</td>
-            <td>{{ ordine.note or '-' }}</td>
-            <td>
-                <a href="{{ url_for('main.set_stato', order_id=ordine.id, stato='in_preparazione') }}">Prep</a>
-                |
-                <a href="{{ url_for('main.set_stato', order_id=ordine.id, stato='evaso') }}">Evaso</a>
-            </td>
-        </tr>
-        {% else %}
-        <tr>
-            <td colspan="7">Nessun ordine presente.</td>
-        </tr>
-        {% endfor %}
+      {% for ordine in recenti %}
+      <tr>
+        <td>#{{ ordine.id }}</td>
+        <td>{{ ordine.cliente.nome if ordine.cliente else '-' }}</td>
+        <td>{{ ordine.data_ordine.strftime('%d/%m/%Y %H:%M') if ordine.data_ordine else '-' }}</td>
+        <td>
+          <span class="status-badge status-{{ ordine.stato|default('vuoto', true) }}">
+            {{ ordine.stato or '-' }}
+          </span>
+        </td>
+        <td>€ {{ '%.2f'|format(ordine.totale|default(0, true)) }}</td>
+        <td>
+          <a class="btn-link" href="{{ url_for('main.ordine_dettaglio', ordine_id=ordine.id) }}">
+            Apri
+          </a>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="6">Nessun ordine recente.</td>
+      </tr>
+      {% endfor %}
     </tbody>
-</table>
+  </table>
+</div>
+
+<div class="card">
+  <div class="section-head">
+    <h3>Situazione operativa</h3>
+  </div>
+  <div class="info-grid">
+    <div class="info-box">
+      <div class="info-label">Ordini da preparare</div>
+      <div class="info-main">{{ da_preparare }}</div>
+      <div class="info-sub">Ordini che richiedono ancora lavorazione.</div>
+    </div>
+    <div class="info-box">
+      <div class="info-label">Archivio clienti</div>
+      <div class="info-main">{{ clienti }}</div>
+      <div class="info-sub">Clienti registrati disponibili per nuovi ordini.</div>
+    </div>
+    <div class="info-box">
+      <div class="info-label">Prodotti attivi</div>
+      <div class="info-main">{{ prodotti }}</div>
+      <div class="info-sub">Articoli attualmente gestiti in magazzino.</div>
+    </div>
+  </div>
+</div>
 {% endblock %}

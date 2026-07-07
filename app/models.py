@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 from . import db
 
 class Cliente(db.Model):
@@ -34,7 +34,9 @@ class Ordine(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     cliente_id = db.Column(db.Integer, db.ForeignKey("cliente.id"), nullable=True)
     data_ordine = db.Column(db.DateTime, default=datetime.utcnow)
+    data_consegna = db.Column(db.Date, default=date.today, nullable=False)
     stato = db.Column(db.String(30), default="nuovo")
+    consegnato = db.Column(db.Boolean, default=False, nullable=False)
     totale = db.Column(db.Float, default=0.0)
     note = db.Column(db.Text)
 
@@ -49,6 +51,8 @@ class RigaOrdine(db.Model):
     quantita = db.Column(db.Float, default=0.0)
     prezzo_unitario = db.Column(db.Float, default=0.0)
     quantita_magazzino = db.Column(db.Float, default=0.0)
+    evaso = db.Column(db.Boolean, default=False, nullable=False)
+    modificato = db.Column(db.Boolean, default=False, nullable=False)
 
     prodotto = db.relationship("Prodotto")
     confezione = db.relationship("Confezione")

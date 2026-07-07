@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page-head">
+  <p class="eyebrow">Report</p>
+  <h1 class="page-title">Preparazione giornata</h1>
+  <p class="page-subtitle">Riepilogo aggregato per prodotto, con quantità ordinate, evase e da preparare.</p>
+</div>
+
+<section class="card" style="margin-bottom: 18px;">
+  <form method="GET" class="inline-form" style="align-items: end;">
+    <label>
+      Data report
+      <input type="date" name="data" value="{{ report_date_str }}">
+    </label>
+
+    <button type="submit" class="btn-primary">Aggiorna</button>
+
+    <a class="btn-secondary" href="{{ url_for('main.export_report_csv', data=report_date_str) }}">
+      Esporta CSV
+    </a>
+
+    <button type="button" class="btn-secondary" onclick="window.print()">
+      Stampa / PDF
+    </button>
+  </form>
+</section>
+
+<section class="card">
+  <div class="summary-list">
+    {% for row in rows %}
+      <div class="summary-row">
+        <div>
+          <strong>{{ row.nome }}</strong>
+          <div class="muted">Unità: {{ row.unita_misura or "-" }}</div>
+        </div>
+
+        <div style="text-align:right;">
+          <div><strong>Ordinato:</strong> {{ "%.2f"|format(row.ordinato) }}</div>
+          <div><strong>Evase:</strong> {{ "%.2f"|format(row.evaso) }}</div>
+          <div><strong>Da preparare:</strong> {{ "%.2f"|format(row.da_preparare) }}</div>
+        </div>
+      </div>
+    {% else %}
+      <div class="empty-cart">
+        <div class="empty-cart-title">Nessun dato per questa data</div>
+        <div class="empty-cart-text">Seleziona un'altra data o crea ordini nella giornata.</div>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
+{% endblock %}

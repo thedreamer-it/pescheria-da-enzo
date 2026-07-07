@@ -1,48 +1,68 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>Clienti</h2>
+<div class="page-head">
+  <div>
+    <p class="eyebrow">Anagrafica</p>
+    <h2 class="page-title">Clienti</h2>
+    <p class="page-subtitle">Gestisci rapidamente i clienti abituali, recapiti e note operative.</p>
+  </div>
+</div>
 
-<form method="POST" class="form-box">
+<div class="card" style="margin-bottom: 18px;">
+  <div class="section-head">
+    <h3>Nuovo cliente</h3>
+  </div>
+
+  <form method="POST" class="form-box" style="padding: 0; margin: 0; border: 0; box-shadow: none; background: transparent;">
     <div class="form-grid">
-        <div>
-            <label for="nome">Nome</label>
-            <input type="text" id="nome" name="nome" required>
-        </div>
+      <div>
+        <label for="nome">Nome</label>
+        <input type="text" id="nome" name="nome" required>
+      </div>
 
-        <div>
-            <label for="telefono">Telefono</label>
-            <input type="text" id="telefono" name="telefono">
-        </div>
+      <div>
+        <label for="telefono">Telefono</label>
+        <input type="text" id="telefono" name="telefono">
+      </div>
 
-        <div style="grid-column: 1 / -1;">
-            <label for="note">Note</label>
-            <textarea id="note" name="note" rows="4"></textarea>
-        </div>
+      <div style="grid-column: 1 / -1;">
+        <label for="note">Note</label>
+        <textarea id="note" name="note" rows="4" placeholder="Preferenze, consegne, annotazioni utili"></textarea>
+      </div>
     </div>
 
-    <button type="submit" class="btn-primary">Aggiungi cliente</button>
-</form>
+    <div style="margin-top: 16px;">
+      <button type="submit" class="btn-primary">Aggiungi cliente</button>
+    </div>
+  </form>
+</div>
 
-<table>
+<div class="card table-card">
+  <div class="section-head">
+    <h3>Elenco clienti</h3>
+  </div>
+
+  <table>
     <thead>
-        <tr>
-            <th>Nome</th>
-            <th>Telefono</th>
-            <th>Note</th>
-        </tr>
+      <tr>
+        <th>Nome</th>
+        <th>Telefono</th>
+        <th>Note</th>
+      </tr>
     </thead>
     <tbody>
-        {% for cliente in clienti %}
-        <tr>
-            <td>{{ cliente.nome }}</td>
-            <td>{{ cliente.telefono or '-' }}</td>
-            <td>{{ cliente.note or '-' }}</td>
-        </tr>
-        {% else %}
-        <tr>
-            <td colspan="3">Nessun cliente presente.</td>
-        </tr>
-        {% endfor %}
+      {% for cliente in clienti %}
+      <tr>
+        <td>{{ cliente.nome }}</td>
+        <td>{{ cliente.telefono or '-' }}</td>
+        <td>{{ cliente.note or '-' }}</td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="3">Nessun cliente presente.</td>
+      </tr>
+      {% endfor %}
     </tbody>
-</table>
+  </table>
+</div>
 {% endblock %}

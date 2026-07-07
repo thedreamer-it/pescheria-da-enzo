@@ -64,60 +64,106 @@
   </form>
 </section>
 
+{% set filtro_attivo = filtro or 'tutti' %}
+<section class="card" style="margin-bottom: 18px;">
+  <div class="card-head">
+    <div>
+      <div class="section-head" style="margin-bottom: 8px;">
+        <h3>Filtri magazzino</h3>
+      </div>
+      <p class="muted">Mostra i prodotti in base alla disponibilità.</p>
+    </div>
+
+    <div class="filter-bar">
+      <a
+        class="filter-chip {% if filtro_attivo == 'tutti' %}active{% endif %}"
+        href="{{ url_for('main.prodotti', filtro='tutti') }}"
+      >
+        Tutti
+      </a>
+      <a
+        class="filter-chip {% if filtro_attivo == 'disponibili' %}active{% endif %}"
+        href="{{ url_for('main.prodotti', filtro='disponibili') }}"
+      >
+        Disponibili
+      </a>
+      <a
+        class="filter-chip {% if filtro_attivo == 'non_disponibili' %}active{% endif %}"
+        href="{{ url_for('main.prodotti', filtro='non_disponibili') }}"
+      >
+        Non disponibili
+      </a>
+    </div>
+  </div>
+</section>
+
 <section class="card table-card">
   <div class="section-head">
     <h3>Elenco prodotti</h3>
   </div>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Prodotto</th>
-        <th>Unità</th>
-        <th>Costo</th>
-        <th>Prezzo pubblico</th>
-        <th>Giacenza</th>
-        <th>Disponibile</th>
-        <th>Azioni</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for prodotto in prodotti %}
-      <tr>
-        <td>
-          <strong>{{ prodotto.nome }}</strong>
-          {% if prodotto.descrizione %}
-            <div class="muted" style="margin-top: 4px;">{{ prodotto.descrizione }}</div>
-          {% endif %}
-        </td>
-        <td>{{ prodotto.unita_misura or '-' }}</td>
-        <td>€ {{ '%.2f'|format(prodotto.costo|default(0, true)) }}</td>
-        <td>€ {{ '%.2f'|format(prodotto.prezzo_pubblico|default(0, true)) }}</td>
-        <td>{{ prodotto.giacenza|default(0, true) }}</td>
-        <td>
-          {% if prodotto.disponibile %}
-            <span class="status-badge status-evaso">Sì</span>
-          {% else %}
-            <span class="status-badge status-vuoto">No</span>
-          {% endif %}
-        </td>
-        <td>
-          <a
-            href="{{ url_for('main.modifica_prodotto', prodotto_id=prodotto.id) }}"
-            class="btn-primary"
-            style="text-decoration: none; display: inline-block;"
-          >
-            Modifica
-          </a>
-        </td>
-      </tr>
-      {% else %}
-      <tr>
-        <td colspan="7">Nessun prodotto presente.</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Prodotto</th>
+          <th>Unità</th>
+          <th>Costo</th>
+          <th>Prezzo pubblico</th>
+          <th>Giacenza</th>
+          <th>Disponibile</th>
+          <th>Azioni</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for prodotto in prodotti %}
+        <tr>
+          <td>
+            <strong>{{ prodotto.nome }}</strong>
+            {% if prodotto.descrizione %}
+              <div class="muted" style="margin-top: 4px;">{{ prodotto.descrizione }}</div>
+            {% endif %}
+          </td>
+          <td>{{ prodotto.unita_misura or '-' }}</td>
+          <td>€ {{ '%.2f'|format(prodotto.costo|default(0, true)) }}</td>
+          <td>€ {{ '%.2f'|format(prodotto.prezzo_pubblico|default(0, true)) }}</td>
+          <td>{{ prodotto.giacenza|default(0, true) }}</td>
+          <td>
+            {% if prodotto.disponibile %}
+              <span class="status-badge status-evaso">Sì</span>
+            {% else %}
+              <span class="status-badge status-vuoto">No</span>
+            {% endif %}
+          </td>
+          <td>
+            <div class="row-actions">
+              <a
+                href="{{ url_for('main.modifica_prodotto', prodotto_id=prodotto.id) }}"
+                class="btn-primary"
+                style="text-decoration: none; display: inline-block;"
+              >
+                Modifica
+              </a>
+
+              <form
+                method="POST"
+                action="{{ url_for('main.elimina_prodotto', prodotto_id=prodotto.id) }}"
+                style="display: inline-block;"
+                onsubmit="return confirm('Eliminare questo prodotto?')"
+              >
+                <button type="submit" class="btn-danger">Elimina</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="7">Nessun prodotto presente.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </section>
 
 {% endblock %}
