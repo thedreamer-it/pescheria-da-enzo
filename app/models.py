@@ -18,7 +18,17 @@ class Prodotto(db.Model):
     prezzo_pubblico = db.Column(db.Float, default=0.0)
     giacenza = db.Column(db.Float, default=0.0)
     disponibile = db.Column(db.Boolean, default=True)
-    unita_misura = db.Column(db.String(20), default="kg")
+    unita_misura = db.Column(db.String(20), default="pz")
+    descrizione = db.Column(db.Text)
+
+class Confezione(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    prodotto_id = db.Column(db.Integer, db.ForeignKey("prodotto.id"), nullable=False)
+    nome = db.Column(db.String(120), nullable=False)
+    moltiplicatore = db.Column(db.Float, default=1.0)
+    prezzo_extra = db.Column(db.Float, default=0.0)
+
+    prodotto = db.relationship("Prodotto", backref="confezioni")
 
 class Ordine(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -35,7 +45,10 @@ class RigaOrdine(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     ordine_id = db.Column(db.Integer, db.ForeignKey("ordine.id"), nullable=False)
     prodotto_id = db.Column(db.Integer, db.ForeignKey("prodotto.id"), nullable=False)
+    confezione_id = db.Column(db.Integer, db.ForeignKey("confezione.id"), nullable=True)
     quantita = db.Column(db.Float, default=0.0)
     prezzo_unitario = db.Column(db.Float, default=0.0)
+    quantita_magazzino = db.Column(db.Float, default=0.0)
 
     prodotto = db.relationship("Prodotto")
+    confezione = db.relationship("Confezione")

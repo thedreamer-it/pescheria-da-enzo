@@ -23,7 +23,9 @@
   <thead>
     <tr>
       <th>Prodotto</th>
+      <th>Confezione</th>
       <th>Q.tà</th>
+      <th>Scarico magazzino</th>
       <th>Prezzo</th>
       <th>Subtotale</th>
     </tr>
@@ -32,7 +34,9 @@
     {% for r in ordine.righe %}
     <tr>
       <td>{{ r.prodotto.nome }}</td>
+      <td>{{ r.confezione.nome if r.confezione else 'Base' }}</td>
       <td>{{ r.quantita }}</td>
+      <td>{{ r.quantita_magazzino }}</td>
       <td>€ {{ '%.2f'|format(r.prezzo_unitario) }}</td>
       <td>€ {{ '%.2f'|format(r.quantita * r.prezzo_unitario) }}</td>
     </tr>

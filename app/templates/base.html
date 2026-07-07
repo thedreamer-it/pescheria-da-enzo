@@ -13,7 +13,7 @@
 <body>
   <div class="mobile-topbar">
     <div class="mobile-brand">Pescheria da Enzo</div>
-    <div class="mobile-badge">Ordini & magazzino</div>
+    <div class="mobile-badge">Gestionale</div>
   </div>
 
   <div class="app-shell">
@@ -22,7 +22,7 @@
         <div class="brand-mark">PE</div>
         <div>
           <h1>Pescheria da Enzo</h1>
-          <p>Gestionale ordini</p>
+          <p>Ordini, magazzino, clienti</p>
         </div>
       </div>
 
@@ -36,7 +36,7 @@
       </nav>
 
       <div class="sidebar-footer">
-        <div class="sidebar-note">Versione online operativa</div>
+        <div class="sidebar-note">Versione elegante e responsive</div>
       </div>
     </aside>
 
@@ -46,13 +46,21 @@
           <div class="eyebrow">App gestionale</div>
           <div class="logo">Pescheria da Enzo</div>
         </div>
-        <div class="header-pill">Responsive mobile + desktop</div>
+        <div class="header-pill">Desktop + mobile</div>
       </header>
 
       <section class="page">
         {% block content %}{% endblock %}
       </section>
     </main>
+  </div>
+
+  <div class="bottom-nav">
+    <a href="{{ url_for('main.dashboard') }}">Home</a>
+    <a href="{{ url_for('main.nuovo_ordine') }}">Ordine</a>
+    <a href="{{ url_for('main.ordini') }}">Ordini</a>
+    <a href="{{ url_for('main.prodotti') }}">Magazzino</a>
+    <a href="{{ url_for('main.clienti') }}">Clienti</a>
   </div>
 </body>
 </html>

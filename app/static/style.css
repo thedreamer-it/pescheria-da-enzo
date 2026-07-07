@@ -679,3 +679,69 @@ tbody tr:hover {
     width: 100%;
   }
 }
+.bottom-nav {
+  display: none;
+}
+
+.card-controls {
+  padding: 0 16px 16px;
+  display: grid;
+  gap: 12px;
+}
+
+.qty-stepper {
+  display: inline-grid;
+  grid-template-columns: 44px 60px 44px;
+  align-items: center;
+  gap: 8px;
+}
+
+.qty-stepper button {
+  height: 44px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--panel-soft);
+  cursor: pointer;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.qty-value {
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid var(--line);
+  font-weight: 700;
+}
+
+@media (max-width: 840px) {
+  .bottom-nav {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 8px;
+    position: sticky;
+    bottom: 0;
+    z-index: 40;
+    padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
+    background: linear-gradient(to top, rgba(244,239,232,0.98), rgba(244,239,232,0.90));
+    backdrop-filter: blur(14px);
+  }
+
+  .bottom-nav a {
+    min-height: 48px;
+    display: grid;
+    place-items: center;
+    border-radius: 14px;
+    background: rgba(255,250,244,0.95);
+    border: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+
+  .sidebar {
+    padding-bottom: 10px;
+  }
+}

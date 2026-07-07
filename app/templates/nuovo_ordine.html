@@ -8,11 +8,32 @@
 
     <div class="prod-grid" id="product-grid">
       {% for p in prodotti %}
-      <div class="prod-card" data-id="{{ p.id }}" data-prezzo="{{ p.prezzo_pubblico }}" data-name="{{ p.nome|lower }}">
+      <div class="prod-card"
+           data-id="{{ p.id }}"
+           data-prezzo="{{ p.prezzo_pubblico }}"
+           data-name="{{ p.nome|lower }}">
         <img src="{{ p.image_url or 'https://picsum.photos/seed/fish' ~ p.id ~ '/640/420' }}" alt="{{ p.nome }}" loading="lazy">
         <div class="prod-title">{{ p.nome }}</div>
-        <div class="prod-sub">€ {{ '%.2f'|format(p.prezzo_pubblico) }} • {{ p.giacenza }} {{ p.unita_misura }}</div>
-        <div class="badge {{ 'on' if p.disponibile else 'off' }}">{{ 'Disponibile' if p.disponibile else 'Non disponibile' }}</div>
+        <div class="prod-sub">{{ p.descrizione or '' }}</div>
+        <div class="prod-sub">€ {{ '%.2f'|format(p.prezzo_pubblico) }} • Giacenza {{ p.giacenza }} {{ p.unita_misura }}</div>
+
+        <div class="card-controls">
+          <label>Confezione</label>
+          <select class="confezione-select">
+            {% for conf in p.confezioni %}
+            <option value="{{ conf.id }}" data-moltiplicatore="{{ conf.moltiplicatore }}">
+              {{ conf.nome }}{% if conf.moltiplicatore != 1 %} (x{{ conf.moltiplicatore }}){% endif %}
+            </option>
+            {% endfor %}
+          </select>
+
+          <div class="qty-stepper">
+            <button type="button" class="qty-minus">-</button>
+            <span class="qty-value">1</span>
+            <button type="button" class="qty-plus">+</button>
+          </div>
+        </div>
+
         <button class="btn-add" {{ 'disabled' if not p.disponibile }}>Aggiungi</button>
       </div>
       {% endfor %}
@@ -53,7 +74,17 @@ function renderCart() {
     total += it.qty * it.prezzo;
     const el = document.createElement('div');
     el.className = 'cart-row';
-    el.innerHTML = `<div>${it.nome} — ${it.qty} x €${it.prezzo.toFixed(2)}</div><div><button onclick="dec(${i})">–</button> <button onclick="inc(${i})">+</button> <button onclick="rm(${i})">x</button></div>`;
+    el.innerHTML = `
+      <div>
+        <strong>${it.nome}</strong><br>
+        ${it.confezione_nome} — ${it.qty} x €${it.prezzo.toFixed(2)}
+      </div>
+      <div>
+        <button onclick="dec(${i})">-</button>
+        <button onclick="inc(${i})">+</button>
+        <button onclick="rm(${i})">x</button>
+      </div>
+    `;
     wrap.appendChild(el);
   });
 
@@ -76,15 +107,49 @@ function rm(i) {
   renderCart();
 }
 
-document.querySelectorAll('.btn-add').forEach(btn => {
-  btn.addEventListener('click', e => {
-    const card = e.target.closest('.prod-card');
+document.querySelectorAll('.prod-card').forEach(card => {
+  let qty = 1;
+  const qtyValue = card.querySelector('.qty-value');
+  const minus = card.querySelector('.qty-minus');
+  const plus = card.querySelector('.qty-plus');
+  const addBtn = card.querySelector('.btn-add');
+
+  minus.addEventListener('click', () => {
+    qty = Math.max(1, qty - 1);
+    qtyValue.textContent = qty;
+  });
+
+  plus.addEventListener('click', () => {
+    qty += 1;
+    qtyValue.textContent = qty;
+  });
+
+  addBtn.addEventListener('click', e => {
     const id = parseInt(card.dataset.id);
     const prezzo = parseFloat(card.dataset.prezzo);
     const nome = card.querySelector('.prod-title').innerText;
-    const existing = cart.find(x => x.prodotto_id === id);
-    if (existing) existing.qty += 1;
-    else cart.push({ prodotto_id: id, nome, qty: 1, prezzo });
+    const confSelect = card.querySelector('.confezione-select');
+    const confId = parseInt(confSelect.value);
+    const confNome = confSelect.options[confSelect.selectedIndex].text;
+    const key = `${id}-${confId}`;
+
+    const existing = cart.find(x => x.key === key);
+    if (existing) {
+      existing.qty += qty;
+    } else {
+      cart.push({
+        key,
+        prodotto_id: id,
+        confezione_id: confId,
+        confezione_nome: confNome,
+        nome,
+        qty,
+        prezzo
+      });
+    }
+
+    qty = 1;
+    qtyValue.textContent = qty;
     renderCart();
   });
 });
@@ -109,6 +174,7 @@ document.getElementById('place-order').addEventListener('click', async () => {
     cliente_id,
     articoli: cart.map(c => ({
       prodotto_id: c.prodotto_id,
+      confezione_id: c.confezione_id,
       qty: c.qty,
       prezzo_unit: c.prezzo
     })),
@@ -117,7 +183,7 @@ document.getElementById('place-order').addEventListener('click', async () => {
 
   const res = await fetch('/api/ordina', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {'Content-Type': 'application/json'},
     body: JSON.stringify(body)
   });
 
