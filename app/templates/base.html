@@ -3,13 +3,29 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0f766e">
   <title>Pescheria da Enzo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+  <div class="mobile-topbar">
+    <div class="mobile-brand">Pescheria da Enzo</div>
+    <div class="mobile-badge">Ordini & magazzino</div>
+  </div>
+
   <div class="app-shell">
     <aside class="sidebar">
-      <h1>Pescheria</h1>
+      <div class="sidebar-brand">
+        <div class="brand-mark">PE</div>
+        <div>
+          <h1>Pescheria da Enzo</h1>
+          <p>Gestionale ordini</p>
+        </div>
+      </div>
+
       <nav>
         <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
         <a href="{{ url_for('main.nuovo_ordine') }}">Nuovo ordine</a>
@@ -18,12 +34,24 @@
         <a href="{{ url_for('main.prodotti') }}">Magazzino</a>
         <a href="{{ url_for('main.clienti') }}">Clienti</a>
       </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-note">Versione online operativa</div>
+      </div>
     </aside>
+
     <main class="main-area">
       <header class="main-header">
-        <div class="logo">Pescheria da Enzo</div>
+        <div>
+          <div class="eyebrow">App gestionale</div>
+          <div class="logo">Pescheria da Enzo</div>
+        </div>
+        <div class="header-pill">Responsive mobile + desktop</div>
       </header>
-      <section class="page">{% block content %}{% endblock %}</section>
+
+      <section class="page">
+        {% block content %}{% endblock %}
+      </section>
     </main>
   </div>
 </body>

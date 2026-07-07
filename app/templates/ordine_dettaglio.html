@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <h2>Ordine #{{ ordine.id }}</h2>
+
 <div class="detail-card">
   <div class="detail-grid">
     <div><strong>Cliente</strong><br>{{ ordine.cliente.nome if ordine.cliente else '-' }}</div>
@@ -8,15 +9,25 @@
     <div><strong>Data</strong><br>{{ ordine.data_ordine.strftime('%d/%m/%Y %H:%M') }}</div>
     <div><strong>Totale</strong><br>€ {{ '%.2f'|format(ordine.totale) }}</div>
   </div>
+
   <p class="detail-note"><strong>Note:</strong> {{ ordine.note or '-' }}</p>
+
   <div class="status-actions">
     <a href="{{ url_for('main.set_stato', order_id=ordine.id, stato='nuovo') }}">Nuovo</a>
     <a href="{{ url_for('main.set_stato', order_id=ordine.id, stato='in_preparazione') }}">In preparazione</a>
     <a href="{{ url_for('main.set_stato', order_id=ordine.id, stato='evaso') }}">Evaso</a>
   </div>
 </div>
+
 <table>
-  <thead><tr><th>Prodotto</th><th>Q.tà</th><th>Prezzo</th><th>Subtotale</th></tr></thead>
+  <thead>
+    <tr>
+      <th>Prodotto</th>
+      <th>Q.tà</th>
+      <th>Prezzo</th>
+      <th>Subtotale</th>
+    </tr>
+  </thead>
   <tbody>
     {% for r in ordine.righe %}
     <tr>

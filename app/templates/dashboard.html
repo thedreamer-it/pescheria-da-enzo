@@ -1,19 +1,39 @@
 {% extends "base.html" %}
 {% block content %}
 <h2>Dashboard</h2>
+
 <div class="dash-grid">
-  <div class="stat-card"><div class="stat-title">Clienti</div><div class="stat-value">{{ clienti }}</div></div>
-  <div class="stat-card"><div class="stat-title">Prodotti</div><div class="stat-value">{{ prodotti }}</div></div>
-  <div class="stat-card"><div class="stat-title">Ordini</div><div class="stat-value">{{ ordini }}</div></div>
-  <div class="stat-card"><div class="stat-title">Da preparare</div><div class="stat-value">{{ da_preparare }}</div></div>
+  <div class="stat-card">
+    <div class="stat-title">Clienti registrati</div>
+    <div class="stat-value">{{ clienti }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-title">Prodotti in archivio</div>
+    <div class="stat-value">{{ prodotti }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-title">Ordini totali</div>
+    <div class="stat-value">{{ ordini }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-title">Da preparare</div>
+    <div class="stat-value">{{ da_preparare }}</div>
+  </div>
 </div>
+
 <section class="recent-section">
   <h3>Ultimi ordini</h3>
   <div class="order-list">
     {% for o in recenti %}
     <a class="order-list-item" href="{{ url_for('main.ordine_dettaglio', order_id=o.id) }}">
-      <div>#{{ o.id }} • {{ o.cliente.nome if o.cliente else '-' }}</div>
-      <div>€ {{ '%.2f'|format(o.totale) }} • {{ o.stato }}</div>
+      <div>
+        <strong>#{{ o.id }}</strong><br>
+        {{ o.cliente.nome if o.cliente else 'Cliente non associato' }}
+      </div>
+      <div>
+        € {{ '%.2f'|format(o.totale) }}<br>
+        <span class="badge {{ 'on' if o.stato == 'evaso' else 'off' if o.stato == 'nuovo' else '' }}">{{ o.stato }}</span>
+      </div>
     </a>
     {% else %}
     <div class="empty">Nessun ordine recente.</div>

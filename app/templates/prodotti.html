@@ -1,26 +1,50 @@
 {% extends "base.html" %}
 {% block content %}
 <h2>Magazzino</h2>
+
 <form method="POST" class="form-box">
   <div class="form-grid">
-    <div><label>Prodotto</label><input name="nome" required></div>
-    <div><label>Unità</label><input name="unita_misura" value="kg"></div>
-    <div><label>Immagine URL</label><input name="image_url" placeholder="https://..."></div>
-    <div><label>Costo</label><input type="number" step="0.01" name="costo"></div>
-    <div><label>Prezzo al pubblico</label><input type="number" step="0.01" name="prezzo_pubblico"></div>
-    <div><label>Giacenza</label><input type="number" step="0.01" name="giacenza"></div>
-    <div class="check-row"><label><input type="checkbox" name="disponibile" value="1"> Disponibile</label></div>
+    <div>
+      <label>Prodotto</label>
+      <input name="nome" required>
+    </div>
+    <div>
+      <label>Unità</label>
+      <input name="unita_misura" value="kg">
+    </div>
+    <div>
+      <label>Immagine URL</label>
+      <input name="image_url" placeholder="https://...">
+    </div>
+    <div>
+      <label>Costo</label>
+      <input type="number" step="0.01" name="costo">
+    </div>
+    <div>
+      <label>Prezzo al pubblico</label>
+      <input type="number" step="0.01" name="prezzo_pubblico">
+    </div>
+    <div>
+      <label>Giacenza</label>
+      <input type="number" step="0.01" name="giacenza">
+    </div>
+    <div class="check-row">
+      <label><input type="checkbox" name="disponibile" value="1"> Disponibile</label>
+    </div>
   </div>
   <button type="submit" class="btn-primary">Aggiungi prodotto</button>
 </form>
+
 <div class="prod-grid">
   {% for prodotto in prodotti %}
-  <article class="prod-card product-card">
+  <article class="prod-card">
     <img src="{{ prodotto.image_url or 'https://picsum.photos/seed/fish' ~ prodotto.id ~ '/640/420' }}" alt="{{ prodotto.nome }}" loading="lazy">
     <div class="prod-title">{{ prodotto.nome }}</div>
     <div class="prod-sub">Costo € {{ '%.2f'|format(prodotto.costo) }} • Pubblico € {{ '%.2f'|format(prodotto.prezzo_pubblico) }}</div>
     <div class="prod-sub">Giacenza: {{ prodotto.giacenza }} {{ prodotto.unita_misura }}</div>
-    <div class="badge {{ 'on' if prodotto.disponibile else 'off' }}">{{ 'Disponibile' if prodotto.disponibile else 'Non disponibile' }}</div>
+    <div class="badge {{ 'on' if prodotto.disponibile else 'off' }}">
+      {{ 'Disponibile' if prodotto.disponibile else 'Non disponibile' }}
+    </div>
   </article>
   {% else %}
   <div class="empty">Nessun prodotto presente.</div>

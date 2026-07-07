@@ -1,19 +1,46 @@
 {% extends "base.html" %}
 {% block content %}
 <h2>Clienti</h2>
+
 <form method="POST" class="form-box">
   <div class="form-grid">
-    <div><label>Nome</label><input name="nome" required></div>
-    <div><label>Telefono</label><input name="telefono"></div>
-    <div><label>Via</label><input name="via"></div>
-    <div><label>Città</label><input name="citta"></div>
-    <div><label>CAP</label><input name="cap"></div>
-    <div style="grid-column:1 / -1"><label>Note</label><textarea name="note" rows="3"></textarea></div>
+    <div>
+      <label>Nome</label>
+      <input name="nome" required>
+    </div>
+    <div>
+      <label>Telefono</label>
+      <input name="telefono">
+    </div>
+    <div>
+      <label>Via</label>
+      <input name="via">
+    </div>
+    <div>
+      <label>Città</label>
+      <input name="citta">
+    </div>
+    <div>
+      <label>CAP</label>
+      <input name="cap">
+    </div>
+    <div style="grid-column:1 / -1">
+      <label>Note</label>
+      <textarea name="note" rows="3"></textarea>
+    </div>
   </div>
   <button type="submit" class="btn-primary">Aggiungi cliente</button>
 </form>
+
 <table>
-  <thead><tr><th>Nome</th><th>Telefono</th><th>Indirizzo</th><th>Note</th></tr></thead>
+  <thead>
+    <tr>
+      <th>Nome</th>
+      <th>Telefono</th>
+      <th>Indirizzo</th>
+      <th>Note</th>
+    </tr>
+  </thead>
   <tbody>
     {% for cliente in clienti %}
     <tr>
@@ -23,7 +50,9 @@
       <td>{{ cliente.note or '-' }}</td>
     </tr>
     {% else %}
-    <tr><td colspan="4">Nessun cliente presente.</td></tr>
+    <tr>
+      <td colspan="4">Nessun cliente presente.</td>
+    </tr>
     {% endfor %}
   </tbody>
 </table>
