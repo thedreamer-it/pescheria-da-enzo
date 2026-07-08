@@ -235,6 +235,80 @@ def export_report_csv():
         },
     )
 
+@main.route("/api/ordini", methods=["POST"])
+def api_crea_ordine():
+    data = request.get_json(silent=True) or {}
+
+    cliente_id = data.get("cliente_id") or None
+    data_consegna = data.get("data_consegna")
+    note = (data.get("note") or "").strip()
+    items = data.get("items") or []
+
+    if not data_consegna:
+        return jsonify({"ok": False, "error": "Data consegna mancante."}), 400
+
+    if not items:
+        return jsonify({"ok": False, "error": "Carrello vuoto."}), 400
+
+    try:
+        data_consegna_dt = datetime.strptime(data_consegna, "%Y-%m-%d").date()
+    except ValueError:
+        return jsonify({"ok": False, "error": "Data consegna non valida."}), 400
+
+    cliente = None
+    if cliente_id:
+        cliente = Cliente.query.get(cliente_id)
+        if not cliente:
+            return jsonify({"ok": False, "error": "Cliente non trovato."}), 400
+
+    ordine = Ordine(
+        cliente_id=cliente.id if cliente else None,
+        data_ordine=date.today(),
+        data_consegna=data_consegna_dt,
+        note=note,
+        stato="in_preparazione",
+        totale=0,
+        consegnato=False,
+    )
+    db.session.add(ordine)
+    db.session.flush()
+
+    totale = 0.0
+
+    for item in items:
+        prodotto_id = item.get("prodotto_id")
+        quantita = float(item.get("quantita") or 0)
+
+        if not prodotto_id or quantita <= 0:
+            continue
+
+        prodotto = Prodotto.query.get(prodotto_id)
+        if not prodotto:
+            continue
+
+        prezzo_unitario = float(prodotto.prezzo_pubblico or 0)
+        quantita_magazzino = quantita
+
+        totale += quantita * prezzo_unitario
+
+        db.session.add(
+            RigaOrdine(
+                ordine_id=ordine.id,
+                prodotto_id=prodotto.id,
+                confezione_id=None,
+                quantita=quantita,
+                prezzo_unitario=prezzo_unitario,
+                quantita_magazzino=quantita_magazzino,
+                evaso=False,
+                modificato=False,
+            )
+        )
+
+    ordine.totale = totale
+    db.session.commit()
+
+    return jsonify({"ok": True, "ordine_id": ordine.id})
+
 
 @main.route("/ordini/<int:ordine_id>", methods=["GET", "POST"])
 def ordine_dettaglio(ordine_id):

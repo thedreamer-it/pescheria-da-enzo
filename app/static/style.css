@@ -1226,6 +1226,24 @@ tr:last-child td {
     display: none !important;
   }
 }
+  .cart-drawer__footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 3;
+    background: var(--surface);
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  }
+
+  .cart-drawer__backdrop {
+    pointer-events: auto;
+  }
+
+  .cart-drawer__panel,
+  .cart-drawer__footer,
+  .cart-drawer__footer button,
+  .mobile-cart-bar {
+    touch-action: manipulation;
+  }
 
 @media print {
   .sidebar,

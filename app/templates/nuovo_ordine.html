@@ -435,11 +435,37 @@ async function submitOrder() {
   window.location.href = `/ordini/${data.ordine_id}`;
 }
 
-document.getElementById('place-order-desktop').addEventListener('click', submitOrder);
-document.getElementById('place-order-mobile').addEventListener('click', submitOrder);
+  const placeOrderDesktopBtn = document.getElementById('place-order-desktop');
+  const placeOrderMobileBtn = document.getElementById('place-order-mobile');
 
-loadCart();
-renderCart();
+  let submittingOrder = false;
+
+  async function guardedSubmitOrder(event) {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+
+    if (submittingOrder) return;
+    submittingOrder = true;
+
+    try {
+      await submitOrder();
+    } finally {
+      setTimeout(() => {
+        submittingOrder = false;
+      }, 400);
+    }
+  }
+
+  ['click', 'touchend', 'pointerup'].forEach(evt => {
+    placeOrderDesktopBtn.addEventListener(evt, guardedSubmitOrder, { passive: false });
+    placeOrderMobileBtn.addEventListener(evt, guardedSubmitOrder, { passive: false });
+  });
+
+  loadCart();
+  renderCart();
+
 </script>
 
 {% endblock %}
