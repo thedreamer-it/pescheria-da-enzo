@@ -146,7 +146,9 @@
 </div>
 
 <script>
-const cart = [];
+const CART_STORAGE_KEY = 'pescheria_enzo_cart_v1';
+let cart = [];
+
 const cartViews = [
   { items: 'cart-items-desktop', total: 'total-desktop' },
   { items: 'cart-items-mobile', total: 'total-mobile' }
@@ -169,6 +171,24 @@ const cartDrawerBackdrop = document.getElementById('cart-drawer-backdrop');
 
 function money(v) {
   return Number(v || 0).toFixed(2);
+}
+
+function saveCart() {
+  localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+}
+
+function loadCart() {
+  try {
+    const raw = localStorage.getItem(CART_STORAGE_KEY);
+    cart = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(cart)) cart = [];
+  } catch (e) {
+    cart = [];
+  }
+}
+
+function clearCartStorage() {
+  localStorage.removeItem(CART_STORAGE_KEY);
 }
 
 function syncField(source, target) {
@@ -241,6 +261,7 @@ function updateMobileBar(total) {
   mobileCartBar.classList.remove('is-bump');
   void mobileCartBar.offsetWidth;
   mobileCartBar.classList.add('is-bump');
+
   mobileCartCount.innerText = count === 1 ? '1 articolo' : `${count} articoli`;
   mobileCartTotal.innerText = total.toFixed(2);
 }
@@ -259,9 +280,11 @@ function renderCart() {
   });
 
   updateMobileBar(total);
+  saveCart();
 }
 
 function dec(i) {
+  if (!cart[i]) return;
   cart[i].qty = Math.max(0, cart[i].qty - 1);
   if (cart[i].qty === 0) {
     cart.splice(i, 1);
@@ -270,16 +293,19 @@ function dec(i) {
 }
 
 function inc(i) {
+  if (!cart[i]) return;
   cart[i].qty += 1;
   renderCart();
 }
 
 function rm(i) {
+  if (!cart[i]) return;
   cart.splice(i, 1);
   renderCart();
 }
 
 function openCartDrawer() {
+  if (itemsCount() === 0) return;
   cartDrawer.classList.add('is-open');
   cartDrawer.setAttribute('aria-hidden', 'false');
   document.body.classList.add('drawer-open');
@@ -292,6 +318,7 @@ function closeCartDrawer() {
 }
 
 mobileCartBar.addEventListener('click', openCartDrawer);
+
 desktopCartTrigger.addEventListener('click', () => {
   if (window.innerWidth <= 900) {
     openCartDrawer();
@@ -299,8 +326,10 @@ desktopCartTrigger.addEventListener('click', () => {
     document.querySelector('.cart-desktop').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 });
+
 closeCartDrawerBtn.addEventListener('click', closeCartDrawer);
 cartDrawerBackdrop.addEventListener('click', closeCartDrawer);
+
 document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape') {
     closeCartDrawer();
@@ -313,6 +342,7 @@ cartViews.forEach(view => {
     if (!btn) return;
     const index = parseInt(btn.dataset.index, 10);
     const action = btn.dataset.action;
+
     if (action === 'dec') dec(index);
     if (action === 'inc') inc(index);
     if (action === 'remove') rm(index);
@@ -329,6 +359,7 @@ document.querySelectorAll('.btn-add').forEach(btn => {
     const unita = card.dataset.unita || 'kg';
 
     const existing = cart.find(x => x.prodotto_id === id);
+
     if (existing) {
       existing.qty += 1;
     } else {
@@ -343,6 +374,12 @@ document.querySelectorAll('.btn-add').forEach(btn => {
     }
 
     renderCart();
+
+    if (window.innerWidth <= 900) {
+      setTimeout(() => {
+        mobileCartBar.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 50);
+    }
   });
 });
 
@@ -355,6 +392,11 @@ document.getElementById('search').addEventListener('input', function () {
 });
 
 async function submitOrder() {
+  if (cart.length === 0) {
+    alert('Aggiungi almeno un prodotto al carrello.');
+    return;
+  }
+
   const clienteId = desktopCliente.value || null;
   const dataConsegna = desktopData.value;
   const note = desktopNote.value.trim();
@@ -381,17 +423,23 @@ async function submitOrder() {
   });
 
   const data = await res.json();
+
   if (!res.ok || !data.ok) {
     alert(data.error || 'Errore durante il salvataggio ordine');
     return;
   }
 
+  cart = [];
+  clearCartStorage();
+  renderCart();
   window.location.href = `/ordini/${data.ordine_id}`;
 }
 
 document.getElementById('place-order-desktop').addEventListener('click', submitOrder);
 document.getElementById('place-order-mobile').addEventListener('click', submitOrder);
 
+loadCart();
 renderCart();
 </script>
+
 {% endblock %}
