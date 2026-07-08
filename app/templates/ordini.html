@@ -4,7 +4,9 @@
 <section class="page-head">
   <p class="eyebrow">Gestione ordini</p>
   <h1 class="page-title">Ordini</h1>
-  <p class="page-subtitle">Apri un ordine per vedere righe, stato, note e avanzamento.</p>
+  <p class="page-subtitle">
+    Apri un ordine per vedere righe, stato, note e avanzamento.
+  </p>
 </section>
 
 <section class="card" style="margin-bottom: 18px;">
@@ -13,9 +15,14 @@
       <div class="section-head" style="margin-bottom: 8px;">
         <h3>Lista ordini</h3>
       </div>
-      <p class="muted">Per il riepilogo giornaliero apri la pagina Report.</p>
+      <p class="muted">
+        Per il riepilogo giornaliero apri la pagina Report.
+      </p>
     </div>
-    <a href="{{ url_for('main.report') }}" class="btn-secondary">Vai al report</a>
+
+    <a href="{{ url_for('main.report') }}" class="btn-secondary">
+      Vai al report
+    </a>
   </div>
 </section>
 
@@ -34,6 +41,7 @@
             <th>Azioni</th>
           </tr>
         </thead>
+
         <tbody>
           {% for ordine in ordini %}
             <tr
@@ -42,14 +50,24 @@
               tabindex="0"
               role="link"
             >
-              <td><strong>#{{ ordine.id }}</strong></td>
-              <td>{{ ordine.cliente.nome if ordine.cliente else "Cliente non associato" }}</td>
-              <td>{{ ordine.data_ordine.strftime("%d/%m/%Y %H:%M") if ordine.data_ordine else "-" }}</td>
+              <td>
+                <strong>#{{ ordine.id }}</strong>
+              </td>
+
+              <td>
+                {{ ordine.cliente.nome if ordine.cliente else "Cliente non associato" }}
+              </td>
+
+              <td>
+                {{ ordine.data_ordine.strftime("%d/%m/%Y %H:%M") if ordine.data_ordine else "-" }}
+              </td>
+
               <td>
                 <span class="status-badge status-{{ ordine.stato }}">
                   {{ ordine.stato|replace("_", " ")|title }}
                 </span>
               </td>
+
               <td>
                 {% if ordine.consegnato %}
                   <span class="status-badge status-evaso">Consegnato</span>
@@ -57,14 +75,20 @@
                   <span class="status-badge status-vuoto">Da consegnare</span>
                 {% endif %}
               </td>
-              <td><strong>€ {{ "%.2f"|format(ordine.totale or 0) }}</strong></td>
+
+              <td>
+                <strong>€ {{ "%.2f"|format(ordine.totale or 0) }}</strong>
+              </td>
+
               <td>
                 <form
                   method="POST"
                   action="{{ url_for('main.elimina_ordine', ordine_id=ordine.id) }}"
-                  onsubmit="event.stopPropagation(); return confirm('Eliminare l\\'ordine #{{ ordine.id }}?');"
+                  onsubmit="event.stopPropagation(); return confirm('Eliminare l\'ordine #{{ ordine.id }}?');"
                 >
-                  <button type="submit" class="btn-secondary">Elimina</button>
+                  <button type="submit" class="btn-secondary">
+                    Elimina
+                  </button>
                 </form>
               </td>
             </tr>
@@ -75,27 +99,29 @@
   {% else %}
     <div class="empty-cart">
       <div class="empty-cart-title">Nessun ordine presente</div>
-      <div class="empty-cart-text">Quando creerai i primi ordini, compariranno qui.</div>
+      <div class="empty-cart-text">
+        Quando creerai i primi ordini, compariranno qui.
+      </div>
     </div>
   {% endif %}
 </section>
 
 <script>
-  document.querySelectorAll('.click-row').forEach(function(row) {
-    row.addEventListener('click', function() {
+  document.querySelectorAll(".click-row").forEach(function(row) {
+    row.addEventListener("click", function() {
       window.location.href = row.dataset.href;
     });
 
-    row.addEventListener('keydown', function(event) {
-      if (event.key === 'Enter' || event.key === ' ') {
+    row.addEventListener("keydown", function(event) {
+      if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
         window.location.href = row.dataset.href;
       }
     });
   });
 
-  document.querySelectorAll('form').forEach(function(form) {
-    form.addEventListener('click', function(event) {
+  document.querySelectorAll("form").forEach(function(form) {
+    form.addEventListener("click", function(event) {
       event.stopPropagation();
     });
   });
