@@ -73,7 +73,11 @@
       Home
     </a>
 
-    <a href="{{ url_for('main.ordini') }}" class="{% if endpoint in ['main.ordini', 'main.ordine_dettaglio', 'main.nuovo_ordine'] %}active{% endif %}">
+    <a href="{{ url_for('main.nuovo_ordine') }}" class="{% if endpoint == 'main.nuovo_ordine' %}active{% endif %}">
+      Nuovo
+    </a>
+
+    <a href="{{ url_for('main.ordini') }}" class="{% if endpoint in ['main.ordini', 'main.ordine_dettaglio'] %}active{% endif %}">
       Ordini
     </a>
 
@@ -81,8 +85,8 @@
       Magazzino
     </a>
 
-    <a href="{{ url_for('main.report') }}" class="{% if endpoint == 'main.report' %}active{% endif %}">
-      Report
+    <a href="{{ url_for('main.clienti') }}" class="{% if endpoint == 'main.clienti' %}active{% endif %}">
+      Clienti
     </a>
   </nav>
 </body>

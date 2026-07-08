@@ -1132,25 +1132,31 @@ tr:last-child td {
 
   .mobile-bottom-nav {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     position: fixed;
     left: 0;
     right: 0;
     bottom: 0;
     z-index: 50;
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(255, 255, 255, 0.96);
     border-top: 1px solid var(--border);
     backdrop-filter: blur(12px);
-    padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
+    padding: 8px 6px calc(8px + env(safe-area-inset-bottom));
+    gap: 2px;
   }
 
   .mobile-bottom-nav a {
     text-align: center;
-    font-size: 12px;
+    font-size: 11px;
+    line-height: 1.15;
     color: var(--text-soft);
-    padding: 10px 6px;
+    padding: 10px 4px;
     font-weight: 700;
+    border-radius: 10px;
+    white-space: nowrap;
   }
+
+
 }
 
 @media (max-width: 640px) {
