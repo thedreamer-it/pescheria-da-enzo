@@ -1,22 +1,31 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="page-head">
+<div class="page-head order-page-head">
   <div>
     <p class="eyebrow">Ordini</p>
     <h2 class="page-title">Nuovo ordine</h2>
-    <p class="page-subtitle">Crea un ordine scegliendo i prodotti dal listino attuale.</p>
+    <p class="page-subtitle">Esperienza ottimizzata per mobile con carrello rapido e checkout sempre accessibile.</p>
   </div>
+  <button type="button" class="btn-secondary order-desktop-cart-trigger" id="desktop-cart-trigger">
+    Apri carrello
+  </button>
 </div>
 
-<div class="order-wrap">
-  <aside class="prod-list card">
-    <div class="section-head">
-      <h3>Listino prodotti</h3>
+<div class="order-layout">
+  <section class="order-catalog card">
+    <div class="section-head order-catalog-head">
+      <div>
+        <h3>Listino prodotti</h3>
+        <p class="catalog-subtitle">Aggiungi prodotti al volo. Il carrello rimane sempre raggiungibile.</p>
+      </div>
+      <div class="catalog-inline-meta" id="catalog-inline-meta">0 articoli</div>
     </div>
 
-    <input id="search" placeholder="Cerca prodotto..." class="search" />
+    <div class="order-tools">
+      <input id="search" placeholder="Cerca prodotto..." class="search" />
+    </div>
 
-    <div class="prod-grid" id="prod-grid">
+    <div class="prod-grid prod-grid-mobile-first" id="prod-grid">
       {% for p in prodotti %}
       <div
         class="prod-card"
@@ -37,9 +46,9 @@
       </div>
       {% endfor %}
     </div>
-  </aside>
+  </section>
 
-  <section class="cart card">
+  <aside class="cart-desktop card">
     <div class="section-head cart-head">
       <div>
         <h3>Carrello</h3>
@@ -47,12 +56,12 @@
       </div>
     </div>
 
-    <div id="cart-items" class="cart-items"></div>
+    <div id="cart-items-desktop" class="cart-items"></div>
 
     <div class="cart-summary">
       <div class="form-row">
-        <label for="cliente">Cliente</label>
-        <select id="cliente">
+        <label for="cliente-desktop">Cliente</label>
+        <select id="cliente-desktop">
           <option value="">Senza cliente</option>
           {% for c in clienti %}
           <option value="{{ c.id }}">{{ c.nome }}</option>
@@ -61,80 +70,195 @@
       </div>
 
       <div class="form-row">
-        <label for="data-consegna">Data consegna</label>
-        <input id="data-consegna" type="date">
+        <label for="data-consegna-desktop">Data consegna</label>
+        <input id="data-consegna-desktop" type="date">
       </div>
 
       <div class="form-row">
-        <label for="order-note">Note</label>
-        <textarea id="order-note" rows="3" placeholder="Eventuali note sull’ordine"></textarea>
+        <label for="order-note-desktop">Note</label>
+        <textarea id="order-note-desktop" rows="3" placeholder="Eventuali note sull’ordine"></textarea>
       </div>
 
       <div class="cart-total-box">
         <span>Totale ordine</span>
-        <strong>€ <span id="total">0.00</span></strong>
+        <strong>€ <span id="total-desktop">0.00</span></strong>
       </div>
 
-      <button id="place-order" class="btn-primary btn-full" type="button">Conferma ordine</button>
+      <button id="place-order-desktop" class="btn-primary btn-full" type="button">Conferma ordine</button>
+    </div>
+  </aside>
+</div>
+
+<button type="button" class="mobile-cart-bar" id="mobile-cart-bar" hidden>
+  <span class="mobile-cart-bar__meta">
+    <span class="mobile-cart-bar__count" id="mobile-cart-count">0 articoli</span>
+    <span class="mobile-cart-bar__hint">Tocca per rivedere il carrello</span>
+  </span>
+  <span class="mobile-cart-bar__total">€ <span id="mobile-cart-total">0.00</span></span>
+</button>
+
+<div class="cart-drawer" id="cart-drawer" aria-hidden="true">
+  <div class="cart-drawer__backdrop" id="cart-drawer-backdrop"></div>
+  <section class="cart-drawer__panel" role="dialog" aria-modal="true" aria-labelledby="cart-drawer-title">
+    <div class="cart-drawer__header">
+      <div>
+        <p class="eyebrow">Checkout</p>
+        <h3 id="cart-drawer-title">Il tuo carrello</h3>
+        <p class="cart-subtitle">Conferma l’ordine da mobile senza perdere il contesto.</p>
+      </div>
+      <button type="button" class="cart-drawer__close" id="close-cart-drawer" aria-label="Chiudi carrello">✕</button>
+    </div>
+
+    <div class="cart-drawer__body">
+      <div id="cart-items-mobile" class="cart-items"></div>
+
+      <div class="cart-summary cart-summary-mobile">
+        <div class="form-row">
+          <label for="cliente-mobile">Cliente</label>
+          <select id="cliente-mobile">
+            <option value="">Senza cliente</option>
+            {% for c in clienti %}
+            <option value="{{ c.id }}">{{ c.nome }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-row">
+          <label for="data-consegna-mobile">Data consegna</label>
+          <input id="data-consegna-mobile" type="date">
+        </div>
+
+        <div class="form-row">
+          <label for="order-note-mobile">Note</label>
+          <textarea id="order-note-mobile" rows="3" placeholder="Eventuali note sull’ordine"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="cart-drawer__footer">
+      <div class="cart-total-box cart-total-box-mobile">
+        <span>Totale ordine</span>
+        <strong>€ <span id="total-mobile">0.00</span></strong>
+      </div>
+      <button id="place-order-mobile" class="btn-primary btn-full" type="button">Conferma ordine</button>
     </div>
   </section>
 </div>
 
 <script>
 const cart = [];
+const cartViews = [
+  { items: 'cart-items-desktop', total: 'total-desktop' },
+  { items: 'cart-items-mobile', total: 'total-mobile' }
+];
+
+const desktopCliente = document.getElementById('cliente-desktop');
+const mobileCliente = document.getElementById('cliente-mobile');
+const desktopData = document.getElementById('data-consegna-desktop');
+const mobileData = document.getElementById('data-consegna-mobile');
+const desktopNote = document.getElementById('order-note-desktop');
+const mobileNote = document.getElementById('order-note-mobile');
+const mobileCartBar = document.getElementById('mobile-cart-bar');
+const mobileCartCount = document.getElementById('mobile-cart-count');
+const mobileCartTotal = document.getElementById('mobile-cart-total');
+const catalogInlineMeta = document.getElementById('catalog-inline-meta');
+const cartDrawer = document.getElementById('cart-drawer');
+const desktopCartTrigger = document.getElementById('desktop-cart-trigger');
+const closeCartDrawerBtn = document.getElementById('close-cart-drawer');
+const cartDrawerBackdrop = document.getElementById('cart-drawer-backdrop');
 
 function money(v) {
   return Number(v || 0).toFixed(2);
 }
 
-function renderCart() {
-  const wrap = document.getElementById('cart-items');
-  wrap.innerHTML = '';
+function syncField(source, target) {
+  target.value = source.value;
+}
 
-  let total = 0;
+desktopCliente.addEventListener('change', () => syncField(desktopCliente, mobileCliente));
+mobileCliente.addEventListener('change', () => syncField(mobileCliente, desktopCliente));
+desktopData.addEventListener('change', () => syncField(desktopData, mobileData));
+mobileData.addEventListener('change', () => syncField(mobileData, desktopData));
+desktopNote.addEventListener('input', () => syncField(desktopNote, mobileNote));
+mobileNote.addEventListener('input', () => syncField(mobileNote, desktopNote));
 
+function itemsCount() {
+  return cart.reduce((sum, item) => sum + item.qty, 0);
+}
+
+function buildCartMarkup() {
   if (cart.length === 0) {
-    wrap.innerHTML = `
+    return `
       <div class="empty-cart">
         <div class="empty-cart-title">Carrello vuoto</div>
         <div class="empty-cart-text">Aggiungi almeno un prodotto dal listino per creare un ordine.</div>
       </div>
     `;
-    document.getElementById('total').innerText = '0.00';
+  }
+
+  return cart.map((it, i) => {
+    const rowTotal = it.qty * it.prezzo;
+    return `
+      <div class="cart-item">
+        <div class="cart-item-top">
+          <div>
+            <div class="cart-item-title">${it.nome}</div>
+            <div class="cart-item-meta">€ ${money(it.prezzo)} cad. • ${it.giacenza} ${it.unita} disponibili</div>
+          </div>
+          <button type="button" class="remove-item" data-action="remove" data-index="${i}">Rimuovi</button>
+        </div>
+
+        <div class="cart-item-bottom">
+          <div class="qty-control">
+            <button type="button" data-action="dec" data-index="${i}" aria-label="Diminuisci quantità">−</button>
+            <span>${it.qty}</span>
+            <button type="button" data-action="inc" data-index="${i}" aria-label="Aumenta quantità">+</button>
+          </div>
+          <div class="cart-line-total">€ ${money(rowTotal)}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function updateMobileBar(total) {
+  const count = itemsCount();
+  catalogInlineMeta.innerText = count === 1 ? '1 articolo' : `${count} articoli`;
+
+  if (count === 0) {
+    mobileCartBar.hidden = true;
+    mobileCartBar.classList.remove('is-visible', 'is-bump');
+    mobileCartCount.innerText = '0 articoli';
+    mobileCartTotal.innerText = '0.00';
+    if (window.innerWidth <= 900) {
+      closeCartDrawer();
+    }
     return;
   }
 
-  cart.forEach((it, i) => {
-    const rowTotal = it.qty * it.prezzo;
-    total += rowTotal;
+  mobileCartBar.hidden = false;
+  mobileCartBar.classList.add('is-visible');
+  mobileCartBar.classList.remove('is-bump');
+  void mobileCartBar.offsetWidth;
+  mobileCartBar.classList.add('is-bump');
+  mobileCartCount.innerText = count === 1 ? '1 articolo' : `${count} articoli`;
+  mobileCartTotal.innerText = total.toFixed(2);
+}
 
-    const el = document.createElement('div');
-    el.className = 'cart-item';
-    el.innerHTML = `
-      <div class="cart-item-top">
-        <div>
-          <div class="cart-item-title">${it.nome}</div>
-          <div class="cart-item-meta">
-            € ${money(it.prezzo)} cad. • ${it.giacenza} ${it.unita} disponibili
-          </div>
-        </div>
-        <button type="button" class="remove-item" onclick="rm(${i})">Rimuovi</button>
-      </div>
+function renderCart() {
+  const markup = buildCartMarkup();
+  let total = 0;
 
-      <div class="cart-item-bottom">
-        <div class="qty-control">
-          <button type="button" onclick="dec(${i})">−</button>
-          <span>${it.qty}</span>
-          <button type="button" onclick="inc(${i})">+</button>
-        </div>
-
-        <div class="cart-line-total">€ ${money(rowTotal)}</div>
-      </div>
-    `;
-    wrap.appendChild(el);
+  cart.forEach((it) => {
+    total += it.qty * it.prezzo;
   });
 
-  document.getElementById('total').innerText = total.toFixed(2);
+  cartViews.forEach(view => {
+    document.getElementById(view.items).innerHTML = markup;
+    document.getElementById(view.total).innerText = total.toFixed(2);
+  });
+
+  updateMobileBar(total);
 }
 
 function dec(i) {
@@ -154,6 +278,46 @@ function rm(i) {
   cart.splice(i, 1);
   renderCart();
 }
+
+function openCartDrawer() {
+  cartDrawer.classList.add('is-open');
+  cartDrawer.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('drawer-open');
+}
+
+function closeCartDrawer() {
+  cartDrawer.classList.remove('is-open');
+  cartDrawer.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('drawer-open');
+}
+
+mobileCartBar.addEventListener('click', openCartDrawer);
+desktopCartTrigger.addEventListener('click', () => {
+  if (window.innerWidth <= 900) {
+    openCartDrawer();
+  } else {
+    document.querySelector('.cart-desktop').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+});
+closeCartDrawerBtn.addEventListener('click', closeCartDrawer);
+cartDrawerBackdrop.addEventListener('click', closeCartDrawer);
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') {
+    closeCartDrawer();
+  }
+});
+
+cartViews.forEach(view => {
+  document.getElementById(view.items).addEventListener('click', (event) => {
+    const btn = event.target.closest('button[data-action]');
+    if (!btn) return;
+    const index = parseInt(btn.dataset.index, 10);
+    const action = btn.dataset.action;
+    if (action === 'dec') dec(index);
+    if (action === 'inc') inc(index);
+    if (action === 'remove') rm(index);
+  });
+});
 
 document.querySelectorAll('.btn-add').forEach(btn => {
   btn.addEventListener('click', e => {
@@ -183,60 +347,50 @@ document.querySelectorAll('.btn-add').forEach(btn => {
 });
 
 document.getElementById('search').addEventListener('input', function () {
-  const q = this.value.toLowerCase().trim();
+  const q = this.value.toLowerCase();
   document.querySelectorAll('.prod-card').forEach(card => {
-    const nome = card.querySelector('.prod-title').innerText.toLowerCase();
-    card.style.display = nome.includes(q) ? '' : 'none';
+    const visible = card.querySelector('.prod-title').innerText.toLowerCase().includes(q);
+    card.style.display = visible ? '' : 'none';
   });
 });
 
-document.getElementById('place-order').addEventListener('click', async () => {
-  const cliente_id = document.getElementById('cliente').value || null;
-  const data_consegna = document.getElementById('data-consegna').value || '';
-  const note = document.getElementById('order-note').value || '';
+async function submitOrder() {
+  const clienteId = desktopCliente.value || null;
+  const dataConsegna = desktopData.value;
+  const note = desktopNote.value.trim();
 
-  if (cart.length === 0) {
-    alert('Carrello vuoto');
+  if (!dataConsegna) {
+    alert('Inserisci la data di consegna.');
     return;
   }
 
-  if (!data_consegna) {
-    alert('Seleziona la data di consegna');
-    return;
-  }
-
-  const body = {
-    cliente_id,
-    data_consegna,
-    articoli: cart.map(c => ({
-      prodotto_id: c.prodotto_id,
-      qty: c.qty,
-      prezzo_unit: c.prezzo
-    })),
-    note
+  const payload = {
+    cliente_id: clienteId,
+    data_consegna: dataConsegna,
+    note,
+    items: cart.map(it => ({
+      prodotto_id: it.prodotto_id,
+      quantita: it.qty
+    }))
   };
 
-  try {
-    const res = await fetch('/api/ordina', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
+  const res = await fetch('/api/ordini', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
 
-    const j = await res.json();
-
-    if (j.ok) {
-      alert('Ordine creato: #' + j.ordine_id);
-      window.location.href = '/ordini';
-    } else {
-      alert(j.error || 'Errore durante la creazione ordine');
-    }
-  } catch (err) {
-    alert('Errore di rete durante il salvataggio ordine');
+  const data = await res.json();
+  if (!res.ok || !data.ok) {
+    alert(data.error || 'Errore durante il salvataggio ordine');
+    return;
   }
-});
 
-document.getElementById('data-consegna').valueAsDate = new Date();
+  window.location.href = `/ordini/${data.ordine_id}`;
+}
+
+document.getElementById('place-order-desktop').addEventListener('click', submitOrder);
+document.getElementById('place-order-mobile').addEventListener('click', submitOrder);
 
 renderCart();
 </script>

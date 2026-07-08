@@ -1032,3 +1032,231 @@ tr:last-child td {
     background: #fff;
   }
 }
+.order-page-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.order-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(320px, 0.85fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.order-catalog,
+.cart-desktop {
+  padding: 20px;
+}
+
+.order-catalog-head {
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.catalog-subtitle {
+  color: var(--text-soft);
+  margin-top: 4px;
+}
+
+.catalog-inline-meta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 100px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.order-tools {
+  margin-bottom: 14px;
+}
+
+.prod-grid-mobile-first {
+  max-height: none;
+  overflow: visible;
+}
+
+.cart-desktop {
+  position: sticky;
+  top: 96px;
+}
+
+.mobile-cart-bar {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  width: calc(100% - 28px);
+  max-width: 720px;
+  position: fixed;
+  left: 50%;
+  bottom: calc(82px + env(safe-area-inset-bottom));
+  transform: translate(-50%, 24px);
+  z-index: 65;
+  padding: 16px 18px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, var(--primary), #0f766e);
+  color: #fff;
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.28);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.mobile-cart-bar.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, 0);
+}
+
+.mobile-cart-bar.is-bump {
+  animation: mobileCartBarBump 260ms ease;
+}
+
+.mobile-cart-bar__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.mobile-cart-bar__count {
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.mobile-cart-bar__hint {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.mobile-cart-bar__total {
+  font-size: 20px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.cart-drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: none;
+}
+
+.cart-drawer.is-open {
+  display: block;
+}
+
+.cart-drawer__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.52);
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+.cart-drawer__panel {
+  position: absolute;
+  inset: 0;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  transform: translateY(100%);
+  transition: transform 220ms ease;
+}
+
+.cart-drawer.is-open .cart-drawer__backdrop {
+  opacity: 1;
+}
+
+.cart-drawer.is-open .cart-drawer__panel {
+  transform: translateY(0);
+}
+
+.cart-drawer__header,
+.cart-drawer__footer {
+  padding: 18px;
+  background: var(--surface);
+}
+
+.cart-drawer__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.cart-drawer__close {
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  font-size: 18px;
+}
+
+.cart-drawer__body {
+  flex: 1;
+  overflow: auto;
+  padding: 18px;
+  display: grid;
+  gap: 18px;
+  align-content: start;
+}
+
+.cart-drawer__footer {
+  border-top: 1px solid var(--border);
+  display: grid;
+  gap: 14px;
+  padding-bottom: calc(18px + env(safe-area-inset-bottom));
+}
+
+.cart-total-box-mobile {
+  margin-top: 0;
+}
+
+body.drawer-open {
+  overflow: hidden;
+}
+
+@keyframes mobileCartBarBump {
+  0% { transform: translate(-50%, 0) scale(1); }
+  50% { transform: translate(-50%, -2px) scale(1.01); }
+  100% { transform: translate(-50%, 0) scale(1); }
+}
+
+@media (max-width: 900px) {
+  .order-page-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .order-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .cart-desktop {
+    display: none;
+  }
+
+  .mobile-cart-bar {
+    display: flex;
+  }
+
+  .page {
+    padding-bottom: 170px;
+  }
+}
+
+@media (min-width: 901px) {
+  .cart-drawer {
+    display: none !important;
+  }
+}
