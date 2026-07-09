@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: pescheria
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn -w 2 -k gthread -b 0.0.0.0:$PORT wsgi:app
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: pescheria-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: FLASK_ENV
+        value: production
+
+databases:
+  - name: pescheria-db
+    plan: free
