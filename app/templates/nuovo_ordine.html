@@ -25,7 +25,7 @@
       <input id="search" placeholder="Cerca prodotto..." class="search" />
     </div>
 
-    <div class="prod-grid prod-grid-mobile-first" id="prod-grid">
+    <div class="prod-list" id="prod-grid">
       {% for p in prodotti %}
       <div
         class="prod-card"
@@ -34,15 +34,13 @@
         data-giacenza="{{ p.giacenza|default(0, true) }}"
         data-unita="{{ p.unita_misura or 'kg' }}"
       >
-        <div>
+        <div class="prod-row-info">
           <div class="prod-title">{{ p.nome }}</div>
-          <div class="prod-sub">
-            € {{ '%.2f'|format(p.prezzo_pubblico|default(0, true)) }}
-            • {{ p.giacenza|default(0, true) }} {{ p.unita_misura or 'kg' }}
-          </div>
+          <div class="prod-row-price">€ {{ '%.2f'|format(p.prezzo_pubblico|default(0, true)) }}</div>
+          <div class="prod-row-sub">{{ p.giacenza|default(0, true) }} {{ p.unita_misura or 'kg' }} disponibili</div>
         </div>
 
-        <button type="button" class="btn-add">Aggiungi</button>
+        <button type="button" class="btn-add-round" aria-label="Aggiungi {{ p.nome }}">+</button>
       </div>
       {% endfor %}
     </div>
@@ -349,39 +347,44 @@ cartViews.forEach(view => {
   });
 });
 
-document.querySelectorAll('.btn-add').forEach(btn => {
-  btn.addEventListener('click', e => {
-    const card = e.target.closest('.prod-card');
-    const id = parseInt(card.dataset.id, 10);
-    const prezzo = parseFloat(card.dataset.prezzo || '0');
-    const nome = card.querySelector('.prod-title').innerText;
-    const giacenza = parseFloat(card.dataset.giacenza || '0');
-    const unita = card.dataset.unita || 'kg';
+    document.querySelectorAll('.btn-add-round').forEach(btn => {
+      btn.addEventListener('click', e => {
+        const card = e.target.closest('.prod-card');
+        const id = parseInt(card.dataset.id, 10);
+        const prezzo = parseFloat(card.dataset.prezzo || '0');
+        const nome = card.querySelector('.prod-title').innerText;
+        const giacenza = parseFloat(card.dataset.giacenza || '0');
+        const unita = card.dataset.unita || 'kg';
 
-    const existing = cart.find(x => x.prodotto_id === id);
+        const existing = cart.find(x => x.prodotto_id === id);
 
-    if (existing) {
-      existing.qty += 1;
-    } else {
-      cart.push({
-        prodotto_id: id,
-        nome,
-        qty: 1,
-        prezzo,
-        giacenza,
-        unita
+        if (existing) {
+          existing.qty += 1;
+        } else {
+          cart.push({
+            prodotto_id: id,
+            nome,
+            qty: 1,
+            prezzo,
+            giacenza,
+            unita
+          });
+        }
+
+        renderCart();
+
+        btn.classList.remove('is-added');
+        void btn.offsetWidth;
+        btn.classList.add('is-added');
+
+        if (window.innerWidth <= 900) {
+          setTimeout(() => {
+            mobileCartBar.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }, 50);
+        }
       });
-    }
+    });
 
-    renderCart();
-
-    if (window.innerWidth <= 900) {
-      setTimeout(() => {
-        mobileCartBar.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }, 50);
-    }
-  });
-});
 
 document.getElementById('search').addEventListener('input', function () {
   const q = this.value.toLowerCase();
