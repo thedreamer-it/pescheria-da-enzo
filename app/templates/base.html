@@ -69,24 +69,29 @@
   </div>
 
   <nav class="mobile-bottom-nav" aria-label="Navigazione principale mobile">
-    <a href="{{ url_for('main.dashboard') }}" class="{% if endpoint == 'main.dashboard' %}active{% endif %}">
-      Home
+    <a href="{{ url_for('main.dashboard') }}" class="{% if endpoint == 'main.dashboard' %}active{% endif %}" title="Dashboard">
+      <span class="nav-icon">📊</span>
+      <span class="nav-label">Home</span>
     </a>
 
-    <a href="{{ url_for('main.nuovo_ordine') }}" class="{% if endpoint == 'main.nuovo_ordine' %}active{% endif %}">
-      Nuovo
+    <a href="{{ url_for('main.nuovo_ordine') }}" class="{% if endpoint == 'main.nuovo_ordine' %}active{% endif %}" title="Crea nuovo ordine">
+      <span class="nav-icon">➕</span>
+      <span class="nav-label">Nuovo</span>
     </a>
 
-    <a href="{{ url_for('main.ordini') }}" class="{% if endpoint in ['main.ordini', 'main.ordine_dettaglio'] %}active{% endif %}">
-      Ordini
+    <a href="{{ url_for('main.ordini') }}" class="{% if endpoint in ['main.ordini', 'main.ordine_dettaglio'] %}active{% endif %}" title="Visualizza ordini">
+      <span class="nav-icon">📦</span>
+      <span class="nav-label">Ordini</span>
     </a>
 
-    <a href="{{ url_for('main.prodotti') }}" class="{% if endpoint in ['main.prodotti', 'main.modifica_prodotto'] %}active{% endif %}">
-      Magazzino
+    <a href="{{ url_for('main.prodotti') }}" class="{% if endpoint in ['main.prodotti', 'main.modifica_prodotto'] %}active{% endif %}" title="Gestisci magazzino">
+      <span class="nav-icon">🏭</span>
+      <span class="nav-label">Magazzino</span>
     </a>
 
-    <a href="{{ url_for('main.clienti') }}" class="{% if endpoint == 'main.clienti' %}active{% endif %}">
-      Clienti
+    <a href="{{ url_for('main.clienti') }}" class="{% if endpoint == 'main.clienti' %}active{% endif %}" title="Gestisci clienti">
+      <span class="nav-icon">👥</span>
+      <span class="nav-label">Clienti</span>
     </a>
   </nav>
 </body>
