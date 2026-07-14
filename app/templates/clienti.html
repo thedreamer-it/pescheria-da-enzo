@@ -8,12 +8,12 @@
   </div>
 </div>
 
-<div class="card" style="margin-bottom: 18px;">
+<div class="card new-client-card" style="margin-bottom: 18px;">
   <div class="section-head">
     <h3>Nuovo cliente</h3>
   </div>
-
-  <form method="POST" class="form-box" style="padding: 0; margin: 0; border: 0; box-shadow: none; background: transparent;">
+ 
+  <form method="POST" class="form-box client-form" style="padding: 0; margin: 0; border: 0; box-shadow: none; background: transparent;">
     <div class="form-grid">
       <div>
         <label for="nome">Nome</label>
@@ -37,32 +37,51 @@
   </form>
 </div>
 
-<div class="card table-card">
+<div class="card table-card client-list-card">
   <div class="section-head">
     <h3>Elenco clienti</h3>
   </div>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Nome</th>
-        <th>Telefono</th>
-        <th>Note</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for cliente in clienti %}
-      <tr>
-        <td>{{ cliente.nome }}</td>
-        <td>{{ cliente.telefono or '-' }}</td>
-        <td>{{ cliente.note or '-' }}</td>
-      </tr>
-      {% else %}
-      <tr>
-        <td colspan="3">Nessun cliente presente.</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  <div class="table-wrap">
+    <table class="client-table">
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Telefono</th>
+          <th>Note</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for cliente in clienti %}
+        <tr>
+          <td>{{ cliente.nome }}</td>
+          <td>{{ cliente.telefono or '-' }}</td>
+          <td>{{ cliente.note or '-' }}</td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="3">Nessun cliente presente.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="client-cards" role="list" aria-label="Elenco clienti in versione compatta">
+    {% for cliente in clienti %}
+    <article class="client-card" role="listitem">
+      <div class="client-card__top">
+        <h4>{{ cliente.nome }}</h4>
+        <span class="client-card__phone">{{ cliente.telefono or 'Nessun telefono' }}</span>
+      </div>
+      <p class="client-card__note">{{ cliente.note or 'Nessuna nota' }}</p>
+    </article>
+    {% else %}
+    <div class="empty-cart client-card client-card--empty">
+      <div class="empty-cart-title">Nessun cliente presente</div>
+      <div class="empty-cart-text">Aggiungi il primo cliente per iniziare a organizzare le consegne.</div>
+    </div>
+    {% endfor %}
+  </div>
 </div>
 {% endblock %}

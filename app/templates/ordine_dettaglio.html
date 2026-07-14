@@ -12,7 +12,7 @@
   </p>
 </section>
 
-<section class="card">
+<section class="card order-detail-card">
   <div class="card-head">
     <div>
       <h3>Stato ordine</h3>
@@ -54,13 +54,13 @@
 </section>
 
 <!-- Nuovo blocco: aggiunta prodotto a ordine esistente -->
-<section class="card">
+<section class="card order-detail-card">
   <div class="section-head">
     <h3>Aggiungi prodotto</h3>
   </div>
   <p class="page-subtitle">Seleziona un prodotto dal magazzino e aggiungilo a questo ordine.</p>
-
-  <form method="post" class="inline-form row-edit-form">
+ 
+  <form method="post" class="inline-form row-edit-form order-add-form">
     <input type="hidden" name="action" value="add_riga">
 
     <label>
@@ -98,7 +98,7 @@
   </form>
 </section>
 
-<section class="card">
+<section class="card order-detail-card">
   <div class="section-head">
     <h3>Righe ordine</h3>
   </div>
