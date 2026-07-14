@@ -274,6 +274,7 @@ def api_crea_ordine():
     db.session.flush()
 
     totale = 0.0
+    righe_inserite = 0
 
     for item in items:
         prodotto_id = item.get("prodotto_id")
@@ -303,6 +304,11 @@ def api_crea_ordine():
                 modificato=False,
             )
         )
+        righe_inserite += 1
+
+    if righe_inserite == 0:
+        db.session.rollback()
+        return jsonify({"ok": False, "error": "Carrello vuoto o articoli non validi."}), 400
 
     ordine.totale = totale
     db.session.commit()
@@ -565,16 +571,28 @@ def api_ordina():
     db.session.flush()
 
     totale = 0.0
+    righe_inserite = 0
 
     for it in articoli:
-        prodotto = Prodotto.query.get(int(it["prodotto_id"]))
+        prodotto_id = it.get("prodotto_id")
+        if not prodotto_id:
+            continue
+
+        try:
+            prodotto = Prodotto.query.get(int(prodotto_id))
+        except (TypeError, ValueError):
+            continue
+
         if not prodotto:
             continue
 
         confezione = None
         confezione_id = it.get("confezione_id")
         if confezione_id:
-            confezione = Confezione.query.get(int(confezione_id))
+            try:
+                confezione = Confezione.query.get(int(confezione_id))
+            except (TypeError, ValueError):
+                confezione = None
 
         qty = float(it.get("qty", 0))
         if qty <= 0:
@@ -598,9 +616,14 @@ def api_ordina():
                 modificato=False,
             )
         )
+        righe_inserite += 1
 
         prodotto.giacenza = max(0, (prodotto.giacenza or 0) - qty_magazzino)
         prodotto.disponibile = prodotto.giacenza > 0
+
+    if righe_inserite == 0:
+        db.session.rollback()
+        return jsonify({"ok": False, "error": "Carrello vuoto o articoli non validi."}), 400
 
     ordine.totale = totale
     db.session.commit()
