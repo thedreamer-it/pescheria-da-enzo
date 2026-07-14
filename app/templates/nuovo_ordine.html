@@ -23,6 +23,11 @@
 
     <div class="order-tools">
       <input id="search" placeholder="Cerca prodotto..." class="search" />
+      <div class="catalog-hint">
+        <span>Quantità manuale</span>
+        <span>Checkout rapido</span>
+        <span>Cart mobile</span>
+      </div>
     </div>
 
     <div class="prod-list" id="prod-grid">
@@ -35,12 +40,28 @@
         data-unita="{{ p.unita_misura or 'kg' }}"
       >
         <div class="prod-row-info">
+          <div class="prod-badge">{{ p.unita_misura or 'kg' }}</div>
           <div class="prod-title">{{ p.nome }}</div>
           <div class="prod-row-price">€ {{ '%.2f'|format(p.prezzo_pubblico|default(0, true)) }}</div>
           <div class="prod-row-sub">{{ p.giacenza|default(0, true) }} {{ p.unita_misura or 'kg' }} disponibili</div>
         </div>
 
-        <button type="button" class="btn-add-round" aria-label="Aggiungi {{ p.nome }}">+</button>
+        <div class="prod-actions">
+          <label class="qty-chip" for="qty-{{ p.id }}">
+            <span>Qtà</span>
+            <input
+              id="qty-{{ p.id }}"
+              class="qty-input"
+              type="number"
+              min="{{ '1' if p.unita_misura in ['pz','tranci','pezzi','unità','unita'] else '0.1' }}"
+              step="{{ '1' if p.unita_misura in ['pz','tranci','pezzi','unità','unita'] else '0.1' }}"
+              inputmode="decimal"
+              value="1"
+              aria-label="Quantità per {{ p.nome }}"
+            />
+          </label>
+          <button type="button" class="btn-add-round" aria-label="Aggiungi {{ p.nome }}">+</button>
+        </div>
       </div>
       {% endfor %}
     </div>
@@ -355,16 +376,19 @@ cartViews.forEach(view => {
         const nome = card.querySelector('.prod-title').innerText;
         const giacenza = parseFloat(card.dataset.giacenza || '0');
         const unita = card.dataset.unita || 'kg';
+        const qtyInput = card.querySelector('.qty-input');
+        const qty = parseFloat(qtyInput?.value || '1');
+        const normalizedQty = Number.isFinite(qty) && qty > 0 ? qty : 1;
 
         const existing = cart.find(x => x.prodotto_id === id);
 
         if (existing) {
-          existing.qty += 1;
+          existing.qty += normalizedQty;
         } else {
           cart.push({
             prodotto_id: id,
             nome,
-            qty: 1,
+            qty: normalizedQty,
             prezzo,
             giacenza,
             unita
